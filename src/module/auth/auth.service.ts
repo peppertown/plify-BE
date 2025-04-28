@@ -2,10 +2,28 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import axios from 'axios';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { SpotifyAuthDto } from './dto/spotify.auth.dto';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly jwt: JwtService,
+  ) {}
+
+  async generateAccessToken(userId: number): Promise<string> {
+    return this.jwt.signAsync(
+      { userId },
+      { expiresIn: '15m' }, // 액세스 토큰 15분
+    );
+  }
+
+  async generateRefreshToken(userId: number): Promise<string> {
+    return this.jwt.signAsync(
+      { userId },
+      { expiresIn: '7d' }, // 리프레시 토큰 7일
+    );
+  }
 
   async handleSpotifyCallback(code: string) {
     try {
@@ -94,14 +112,18 @@ export class AuthService {
       // 5. 유저 응답 데이터 정리
       const responseUser = this.filterUserFields(user);
 
+      // 6. jwt 토큰 발급
+      const accessToken = await this.generateAccessToken(user.id);
+      const refreshToken = await this.generateRefreshToken(user.id);
+
       return {
         message: {
           code: 200,
           message: '스포티파이 로그인 성공',
         },
         user: responseUser,
-        accessToken: access_token,
-        refreshToken: refresh_token,
+        accessToken,
+        refreshToken,
       };
     } catch (error) {
       console.error(error);
