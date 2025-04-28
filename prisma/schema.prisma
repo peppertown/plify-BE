@@ -6,10 +6,22 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../generated/prisma"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
   url      = env("DATABASE_URL")
+}
+
+model User {
+  id             Int      @id @default(autoincrement())
+  spotifyId      String?  @unique
+  email          String   @unique
+  name           String
+  nickname       String   @unique
+  auth_provider  String
+  profile_url    String?
+  password       String?
+  followersCount Int      @default(0)
+  createdAt      DateTime @default(now())
 }
