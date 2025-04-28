@@ -3,12 +3,14 @@ import axios from 'axios';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { SpotifyAuthDto } from './dto/spotify.auth.dto';
 import { JwtService } from '@nestjs/jwt';
+import { RedisService } from 'src/redis/redis.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwt: JwtService,
+    private readonly redis: RedisService,
   ) {}
 
   async generateAccessToken(userId: number): Promise<string> {
@@ -23,6 +25,18 @@ export class AuthService {
       { userId },
       { expiresIn: '7d' }, // 리프레시 토큰 7일
     );
+  }
+
+  async saveServerRefreshToken(userId: number, refreshToken: string) {
+    const key = `server_refresh_token:${userId}`;
+    const ttlSeconds = 7 * 24 * 60 * 60; // 7일
+    await this.redis.set(key, refreshToken, ttlSeconds);
+  }
+
+  async saveSpotifyRefreshToken(userId: number, spotifyRefreshToken: string) {
+    const key = `spotify_refresh_token:${userId}`;
+    const ttlSeconds = 30 * 24 * 60 * 60; // 30일
+    await this.redis.set(key, spotifyRefreshToken, ttlSeconds);
   }
 
   async handleSpotifyCallback(code: string) {
@@ -115,6 +129,10 @@ export class AuthService {
       // 6. jwt 토큰 발급
       const accessToken = await this.generateAccessToken(user.id);
       const refreshToken = await this.generateRefreshToken(user.id);
+
+      // 7. 리프레시 토큰 레디스에 저장
+      await this.saveServerRefreshToken(user.id, refreshToken);
+      await this.saveSpotifyRefreshToken(user.id, refresh_token);
 
       return {
         message: {
