@@ -140,8 +140,14 @@ export class AuthService {
           message: '스포티파이 로그인 성공',
         },
         user: responseUser,
-        accessToken,
-        refreshToken,
+        jwt: {
+          accessToken,
+          refreshToken,
+        },
+        spotify: {
+          accessToken: access_token,
+          refreshToken: refresh_token,
+        },
       };
     } catch (error) {
       console.error(error);

@@ -72,15 +72,35 @@ export const spotifyLoginDocs = {
             },
           },
         },
-        accessToken: {
-          type: 'string',
-          example: 'JWT Access Token 문자열',
-          description: '서버 발급 Access Token',
+        jwt: {
+          type: 'object',
+          properties: {
+            accessToken: {
+              type: 'string',
+              example: '서버 발급 JWT Access Token',
+              description: '서버가 발급한 Access Token',
+            },
+            refreshToken: {
+              type: 'string',
+              example: '서버 발급 JWT Refresh Token',
+              description: '서버가 발급한 Refresh Token',
+            },
+          },
         },
-        refreshToken: {
-          type: 'string',
-          example: 'JWT Refresh Token 문자열',
-          description: '서버 발급 Refresh Token',
+        spotify: {
+          type: 'object',
+          properties: {
+            accessToken: {
+              type: 'string',
+              example: '스포티파이 OAuth Access Token',
+              description: 'Spotify에서 직접 발급한 Access Token',
+            },
+            refreshToken: {
+              type: 'string',
+              example: '스포티파이 OAuth Refresh Token',
+              description: 'Spotify에서 직접 발급한 Refresh Token',
+            },
+          },
         },
       },
     },
