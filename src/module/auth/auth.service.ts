@@ -13,32 +13,6 @@ export class AuthService {
     private readonly redis: RedisService,
   ) {}
 
-  async generateAccessToken(userId: number): Promise<string> {
-    return this.jwt.signAsync(
-      { userId },
-      { expiresIn: '15m' }, // 액세스 토큰 15분
-    );
-  }
-
-  async generateRefreshToken(userId: number): Promise<string> {
-    return this.jwt.signAsync(
-      { userId },
-      { expiresIn: '7d' }, // 리프레시 토큰 7일
-    );
-  }
-
-  async saveServerRefreshToken(userId: number, refreshToken: string) {
-    const key = `server_refresh_token:${userId}`;
-    const ttlSeconds = 7 * 24 * 60 * 60; // 7일
-    await this.redis.set(key, refreshToken, ttlSeconds);
-  }
-
-  async saveSpotifyRefreshToken(userId: number, spotifyRefreshToken: string) {
-    const key = `spotify_refresh_token:${userId}`;
-    const ttlSeconds = 30 * 24 * 60 * 60; // 30일
-    await this.redis.set(key, spotifyRefreshToken, ttlSeconds);
-  }
-
   async handleSpotifyCallback(code: string) {
     try {
       // 1. 스포티파이 토큰 요청
@@ -154,6 +128,7 @@ export class AuthService {
       throw new HttpException('스포티파이 인증 실패', HttpStatus.BAD_REQUEST);
     }
   }
+
   private filterUserFields(user: any) {
     return {
       userId: user.id,
@@ -163,5 +138,60 @@ export class AuthService {
       profileUrl: user.profile_url,
       authProvider: user.auth_provider,
     };
+  }
+
+  async refreshSpotifyAccessToken(refreshToken: string): Promise<string> {
+    const basicToken = Buffer.from(
+      `${process.env.SPOTIFY_CLIENT_ID}:${process.env.SPOTIFY_CLIENT_SECRET}`,
+    ).toString('base64');
+
+    const params = new URLSearchParams({
+      grant_type: 'refresh_token',
+      refresh_token: refreshToken,
+    });
+
+    const response = await axios.post(
+      'https://accounts.spotify.com/api/token',
+      params,
+      {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          Authorization: `Basic ${basicToken}`,
+        },
+      },
+    );
+
+    const { access_token } = response.data;
+    if (!access_token) {
+      throw new Error('스포티파이 액세스 토큰 갱신 실패');
+    }
+
+    return access_token;
+  }
+
+  async generateAccessToken(userId: number): Promise<string> {
+    return this.jwt.signAsync(
+      { userId },
+      { expiresIn: '15m' }, // 액세스 토큰 15분
+    );
+  }
+
+  async generateRefreshToken(userId: number): Promise<string> {
+    return this.jwt.signAsync(
+      { userId },
+      { expiresIn: '7d' }, // 리프레시 토큰 7일
+    );
+  }
+
+  async saveServerRefreshToken(userId: number, refreshToken: string) {
+    const key = `server_refresh_token:${userId}`;
+    const ttlSeconds = 7 * 24 * 60 * 60; // 7일
+    await this.redis.set(key, refreshToken, ttlSeconds);
+  }
+
+  async saveSpotifyRefreshToken(userId: number, spotifyRefreshToken: string) {
+    const key = `spotify_refresh_token:${userId}`;
+    const ttlSeconds = 30 * 24 * 60 * 60; // 30일
+    await this.redis.set(key, spotifyRefreshToken, ttlSeconds);
   }
 }
