@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
@@ -32,6 +32,18 @@ export class PlaylistService {
         text: '전체 플레이리스트를 정상적으로 조회했습니다.',
       },
     };
+  }
+
+  extractPlaylistId(url: string): string {
+    const regex = /playlist\/([a-zA-Z0-9]+)/;
+    const match = url.match(regex);
+    if (match && match[1]) {
+      return match[1];
+    }
+    throw new HttpException(
+      'Invalid Spotify playlist URL',
+      HttpStatus.BAD_REQUEST,
+    );
   }
 
   getPlaylistObj(result: any) {
