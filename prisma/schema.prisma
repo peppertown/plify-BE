@@ -14,14 +14,26 @@ datasource db {
 }
 
 model User {
-  id             Int      @id @default(autoincrement())
-  spotifyId      String?  @unique
-  email          String   @unique
+  id             Int        @id @default(autoincrement())
+  spotifyId      String?    @unique
+  email          String     @unique
   name           String
-  nickname       String   @unique
+  nickname       String     @unique
   auth_provider  String
   profile_url    String?
   password       String?
-  followersCount Int      @default(0)
-  createdAt      DateTime @default(now())
+  followersCount Int        @default(0)
+  createdAt      DateTime   @default(now())
+  Playlist       Playlist[]
+}
+
+model Playlist {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  playlistId String   @unique // Spotify URL에서 추출한 실제 플레이리스트 ID
+  viewCount  Int      @default(0)
+  likeCount  Int      @default(0)
+  createdAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
 }
