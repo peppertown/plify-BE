@@ -1,7 +1,7 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ApiTags } from '@nestjs/swagger';
-import { refreshTokenDocs, spotifyLoginDocs } from './docs/auth.docs';
+import { login, refreshTokenDocs, spotifyLoginDocs } from './docs/auth.docs';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -25,6 +25,7 @@ export class AuthController {
   }
 
   @Post('login')
+  @login.body
   async login(@Body('id') id: string) {
     return await this.authService.login(id);
   }

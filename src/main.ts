@@ -9,6 +9,7 @@ async function bootstrap() {
     .setTitle('Plify API')
     .setDescription('Plify 프로젝트 API 문서입니다.')
     .setVersion('1.0')
+    .addBearerAuth()
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

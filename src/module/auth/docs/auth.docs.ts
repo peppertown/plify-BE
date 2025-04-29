@@ -180,3 +180,16 @@ export const refreshTokenDocs = {
     },
   }),
 };
+
+export const login = {
+  body: ApiBody({
+    description: '테스트용 자체 로그인 로직',
+    schema: {
+      type: 'object',
+      properties: {
+        id: { type: 'string' },
+      },
+      required: ['code'],
+    },
+  }),
+};
