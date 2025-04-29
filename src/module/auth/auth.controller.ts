@@ -1,7 +1,7 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ApiTags } from '@nestjs/swagger';
-import { spotifyLoginDocs } from './docs/auth.docs';
+import { refreshTokenDocs, spotifyLoginDocs } from './docs/auth.docs';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -17,6 +17,9 @@ export class AuthController {
   }
 
   @Post('refresh')
+  @refreshTokenDocs.operation
+  @refreshTokenDocs.body
+  @refreshTokenDocs.response
   async refreshToken(@Body('refreshToken') refreshToken: string) {
     return await this.authService.handleRefresh(refreshToken);
   }

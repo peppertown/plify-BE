@@ -106,3 +106,77 @@ export const spotifyLoginDocs = {
     },
   }),
 };
+
+export const refreshTokenDocs = {
+  operation: ApiOperation({
+    summary: 'JWT & Spotify 토큰 리프레시',
+    description:
+      '서버의 JWT refreshToken을 사용하여 새로운 JWT access/refresh 토큰과 Spotify accessToken을 재발급합니다.',
+  }),
+  body: ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        refreshToken: {
+          type: 'string',
+          description: '서버 발급 JWT refreshToken',
+          example: '서버 JWT 리프레시 토큰 문자열',
+        },
+      },
+    },
+  }),
+  response: ApiResponse({
+    status: HttpStatus.OK,
+    description: '토큰 재발급 성공',
+    schema: {
+      type: 'object',
+      properties: {
+        message: {
+          type: 'object',
+          properties: {
+            code: {
+              type: 'number',
+              example: 200,
+              description: '응답 코드 (성공: 200)',
+            },
+            message: {
+              type: 'string',
+              example: '토큰 재발급 성공',
+              description: '응답 메시지',
+            },
+          },
+        },
+        jwt: {
+          type: 'object',
+          properties: {
+            accessToken: {
+              type: 'string',
+              example: '새 서버 JWT Access Token',
+              description: '서버가 새로 발급한 Access Token',
+            },
+            refreshToken: {
+              type: 'string',
+              example: '새 서버 JWT Refresh Token',
+              description: '서버가 새로 발급한 Refresh Token',
+            },
+          },
+        },
+        spotify: {
+          type: 'object',
+          properties: {
+            accessToken: {
+              type: 'string',
+              example: '새 스포티파이 Access Token',
+              description: '스포티파이에서 새로 발급받은 Access Token',
+            },
+            refreshToken: {
+              type: 'string',
+              example: '기존 스포티파이 Refresh Token',
+              description: '스포티파이에서 사용 중인 Refresh Token (변경 없음)',
+            },
+          },
+        },
+      },
+    },
+  }),
+};
