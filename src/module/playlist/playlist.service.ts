@@ -77,7 +77,7 @@ export class PlaylistService {
       userName: result.user.name,
       userNickname: result.user.nickname,
       userProfileUrl: result.user.profile_url,
-      id: result.id,
+      postId: result.id,
       playlistId: result.playlistId,
       likeCount: result._count.likes,
       isLiked: !!result.PlaylistLike[0],
