@@ -5,6 +5,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 export class PlaylistService {
   constructor(private readonly prisma: PrismaService) {}
 
+  // 전체 플레이리스트 조회
   async getAllPlaylists(userId: number) {
     const result = await this.prisma.playlist.findMany({
       orderBy: { id: 'desc' },
@@ -34,6 +35,7 @@ export class PlaylistService {
     };
   }
 
+  // 플레이리스트 id 추출
   extractPlaylistId(url: string): string {
     const regex = /playlist\/([a-zA-Z0-9]+)/;
     const match = url.match(regex);
@@ -46,6 +48,7 @@ export class PlaylistService {
     );
   }
 
+  // 응답데이터 포맷
   getPlaylistObj(result: any) {
     return {
       userId: result.user.id,

@@ -10,6 +10,7 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 export class PlaylistController {
   constructor(private readonly playlistService: PlaylistService) {}
 
+  // 전체 플레이리스트 조회
   @Get()
   @UseGuards(AuthGuard('jwt'))
   @ApiBearerAuth()
