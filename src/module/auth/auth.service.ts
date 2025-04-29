@@ -154,6 +154,52 @@ export class AuthService {
     }
   }
 
+  async handleRefresh(refreshToken: string) {
+    try {
+      // 1. JWT refreshToken 검증 및 유저 ID 파악
+      const decoded = this.verifyRefreshToken(refreshToken);
+      const userId = decoded.sub;
+
+      // 2. Redis에서 Spotify refreshToken 가져오기
+      const spotifyRefreshToken = await this.redis.get(
+        `spotify:refresh:${userId}`,
+      );
+      if (!spotifyRefreshToken) {
+        throw new Error('Spotify refresh token을 찾을 수 없습니다');
+      }
+
+      // 3. Spotify access_token 리프레시
+      const spotifyAccessToken =
+        await this.refreshSpotifyAccessToken(spotifyRefreshToken);
+
+      // 4. 새로운 JWT access/refresh 발급
+      const newAccessToken = await this.generateAccessToken(userId);
+      const newRefreshToken = await this.generateRefreshToken(userId);
+
+      // 5. Redis에 새로운 JWT refreshToken 저장
+      await this.saveServerRefreshToken(userId, newRefreshToken);
+
+      // 6. 응답
+      return {
+        message: {
+          code: 200,
+          message: '토큰 재발급 성공',
+        },
+        jwt: {
+          accessToken: newAccessToken,
+          refreshToken: newRefreshToken,
+        },
+        spotify: {
+          accessToken: spotifyAccessToken,
+          refreshToken: spotifyRefreshToken,
+        },
+      };
+    } catch (error) {
+      console.error(error);
+      throw new HttpException('토큰 재발급 실패', HttpStatus.UNAUTHORIZED);
+    }
+  }
+
   async refreshSpotifyAccessToken(refreshToken: string): Promise<string> {
     const basicToken = Buffer.from(
       `${process.env.SPOTIFY_CLIENT_ID}:${process.env.SPOTIFY_CLIENT_SECRET}`,

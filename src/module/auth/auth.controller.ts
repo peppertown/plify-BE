@@ -15,4 +15,9 @@ export class AuthController {
   async spotifyLogin(@Body('code') code: string) {
     return await this.authService.handleSpotifyCallback(code);
   }
+
+  @Post('refresh')
+  async refreshToken(@Body('refreshToken') refreshToken: string) {
+    return await this.authService.handleRefresh(refreshToken);
+  }
 }
