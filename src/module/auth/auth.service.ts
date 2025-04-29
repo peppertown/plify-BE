@@ -200,6 +200,16 @@ export class AuthService {
     }
   }
 
+  async login(id: string) {
+    if (id == process.env.TEST_ID) {
+      return {
+        accessToken: await this.generateAccessToken(2),
+      };
+    } else {
+      return false;
+    }
+  }
+
   async refreshSpotifyAccessToken(refreshToken: string): Promise<string> {
     const basicToken = Buffer.from(
       `${process.env.SPOTIFY_CLIENT_ID}:${process.env.SPOTIFY_CLIENT_SECRET}`,
