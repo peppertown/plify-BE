@@ -232,7 +232,7 @@ export class AuthService {
   async generateAccessToken(userId: number): Promise<string> {
     return this.jwt.signAsync(
       { userId },
-      { expiresIn: '15m' }, // 액세스 토큰 15분
+      { expiresIn: '1h' }, // 액세스 토큰 1시간
     );
   }
 
