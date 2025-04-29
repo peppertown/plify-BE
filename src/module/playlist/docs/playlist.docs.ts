@@ -1,4 +1,4 @@
-import { ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 export const getAllPlaylistsDocs = {
   operation: ApiOperation({
@@ -27,6 +27,49 @@ export const getAllPlaylistsDocs = {
         message: {
           code: 200,
           text: '전체 플레이리스트를 정상적으로 조회했습니다.',
+        },
+      },
+    },
+  }),
+};
+
+export const addPlaylistDocs = {
+  operation: ApiOperation({
+    summary: '플레이리스트 추가 API',
+    description: '사용자가 플레이리스트 URL을 업로드합니다.',
+  }),
+
+  body: ApiBody({
+    description: '추가할 플레이리스트 URL',
+    schema: {
+      type: 'object',
+      properties: {
+        playlistUrl: {
+          type: 'string',
+          example: '추가할 플레이리스트 URL',
+        },
+      },
+    },
+  }),
+
+  response: ApiResponse({
+    status: 201,
+    description: '플레이리스트가 성공적으로 생성되었습니다.',
+    schema: {
+      type: 'object',
+      properties: {
+        message: {
+          type: 'object',
+          properties: {
+            code: { type: 'integer', example: 200 },
+            text: { type: 'string', example: '플레이리스트가 생성되었습니다.' },
+          },
+        },
+        playlists: {
+          type: 'object',
+          properties: {
+            id: { type: 'integer', example: 2 },
+          },
         },
       },
     },

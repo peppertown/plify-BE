@@ -35,6 +35,28 @@ export class PlaylistService {
     };
   }
 
+  // 플레이리스트 추가
+  async addPlaylist(userId: number, playlistUrl: string) {
+    const playlistId = this.extractPlaylistId(playlistUrl);
+
+    const newPlaylist = await this.prisma.playlist.create({
+      data: {
+        userId,
+        playlistId,
+      },
+    });
+
+    return {
+      message: {
+        code: 200,
+        text: '플레이리스트가 생성되었습니다.',
+      },
+      playlists: {
+        id: newPlaylist.id,
+      },
+    };
+  }
+
   // 플레이리스트 id 추출
   extractPlaylistId(url: string): string {
     const regex = /playlist\/([a-zA-Z0-9]+)/;
