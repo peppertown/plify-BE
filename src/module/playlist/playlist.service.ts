@@ -35,6 +35,60 @@ export class PlaylistService {
     };
   }
 
+  // 플레이리스트 댓글 조회 == 플레이리스트 개별 조회
+  async getPlaylist(postId: number, userId: number) {
+    try {
+      // 조회수 증가
+      await this.prisma.playlist.update({
+        where: { id: postId },
+        data: { viewCount: { increment: 1 } },
+      });
+
+      const result = await this.prisma.comment.findMany({
+        where: { postId },
+        include: {
+          user: {
+            select: {
+              name: true,
+              nickname: true,
+              profile_url: true,
+            },
+          },
+          _count: {
+            select: { likes: true }, // 좋아요 수
+          },
+          likes: {
+            where: { userId }, // 유저 좋아요 여부
+            select: { id: true },
+          },
+        },
+      });
+
+      const comment = result.map((res) => this.getCommentObj(res));
+
+      return {
+        comment,
+        message: {
+          code: 200,
+          text: '개별 플레이리스트를 정상적으로 조회했습니다.',
+        },
+      };
+    } catch (err) {
+      console.error(err);
+      if (err.code === 'P2025') {
+        throw new HttpException(
+          '플레이리스트를 찾을 수 없습니다.',
+          HttpStatus.NOT_FOUND,
+        );
+      }
+
+      throw new HttpException(
+        '서버에서 오류가 발생했습니다.',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
   // 플레이리스트 추가
   async addPlaylist(userId: number, playlistUrl: string) {
     const playlistId = this.extractPlaylistId(playlistUrl);
@@ -83,6 +137,22 @@ export class PlaylistService {
       isLiked: !!result.PlaylistLike[0],
       viewCount: result.viewCount,
       createdAt: result.createdAt,
+    };
+  }
+
+  // 댓글 응답데이터 포맷
+  getCommentObj(res: any) {
+    return {
+      commentId: res.id,
+      postId: res.postId,
+      userId: res.userId,
+      userName: res.user.name,
+      userNickname: res.user.nickname,
+      userProfileUrl: res.user.profile_url,
+      content: res.content,
+      createdAt: res.createdAt,
+      likeCount: res._count.likes,
+      isLiked: !!res.likes[0],
     };
   }
 }

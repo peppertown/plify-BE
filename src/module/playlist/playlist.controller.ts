@@ -1,8 +1,20 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { PlaylistService } from './playlist.service';
 import { AuthGuard } from '@nestjs/passport';
 import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
-import { addPlaylistDocs, getAllPlaylistsDocs } from './docs/playlist.docs';
+import {
+  addPlaylistDocs,
+  getAllPlaylistsDocs,
+  getPlaylistDocs,
+} from './docs/playlist.docs';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('playlist')
@@ -31,5 +43,18 @@ export class PlaylistController {
     @Body() body: { playlistUrl: string },
   ) {
     return await this.playlistService.addPlaylist(userId, body.playlistUrl);
+  }
+
+  @Get(':postId')
+  @UseGuards(AuthGuard('jwt'))
+  @ApiBearerAuth()
+  @getPlaylistDocs.operation
+  @getPlaylistDocs.param
+  @getPlaylistDocs.response
+  async getPlaylist(
+    @CurrentUserId() userId: number,
+    @Param('postId', ParseIntPipe) postId: number,
+  ) {
+    return await this.playlistService.getPlaylist(postId, userId);
   }
 }

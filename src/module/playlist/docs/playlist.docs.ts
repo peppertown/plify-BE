@@ -1,4 +1,4 @@
-import { ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 
 export const getAllPlaylistsDocs = {
   operation: ApiOperation({
@@ -70,6 +70,47 @@ export const addPlaylistDocs = {
           properties: {
             id: { type: 'integer', example: 2 },
           },
+        },
+      },
+    },
+  }),
+};
+
+export const getPlaylistDocs = {
+  operation: ApiOperation({
+    summary: '개별 플레이리스트 조회',
+    description: 'postId를 통해 해당 플레이리스트의 댓글 목록을 가져옵니다.',
+  }),
+
+  param: ApiParam({
+    name: 'postId',
+    type: Number,
+    required: true,
+    description: '조회할 플레이리스트의 고유 ID',
+  }),
+
+  response: ApiResponse({
+    status: 200,
+    description: '플레이리스트의 댓글 정보를 반환합니다.',
+    schema: {
+      example: {
+        comment: [
+          {
+            commentId: '댓글 아이디',
+            postId: '포스트 아이디',
+            userId: '유저 아이디',
+            userName: '유저 이름',
+            userNickname: '유저 닉네임',
+            userProfileUrl: '유저 프로필 url',
+            content: '댓글 내용',
+            createdAt: '작성 일자',
+            likeCount: '좋아요 수',
+            isLiked: '좋아요 여부',
+          },
+        ],
+        message: {
+          code: 200,
+          text: '개별 플레이리스트를 정상적으로 조회했습니다.',
         },
       },
     },
