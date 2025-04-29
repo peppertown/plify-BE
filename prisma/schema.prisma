@@ -14,17 +14,20 @@ datasource db {
 }
 
 model User {
-  id             Int        @id @default(autoincrement())
-  spotifyId      String?    @unique
-  email          String     @unique
+  id             Int            @id @default(autoincrement())
+  spotifyId      String?        @unique
+  email          String         @unique
   name           String
-  nickname       String     @unique
+  nickname       String         @unique
   auth_provider  String
   profile_url    String?
   password       String?
-  followersCount Int        @default(0)
-  createdAt      DateTime   @default(now())
+  followersCount Int            @default(0)
+  createdAt      DateTime       @default(now())
   Playlist       Playlist[]
+  Comment        Comment[]
+  CommentLike    CommentLike[]
+  PlaylistLike   PlaylistLike[]
 }
 
 model Playlist {
@@ -35,5 +38,44 @@ model Playlist {
   likeCount  Int      @default(0)
   createdAt  DateTime @default(now())
 
-  user User @relation(fields: [userId], references: [id])
+  user         User           @relation(fields: [userId], references: [id])
+  Comment      Comment[]
+  PlaylistLike PlaylistLike[]
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  postId    Int
+  userId    Int
+  content   String
+  likeCount Int      @default(0)
+  createdAt DateTime @default(now())
+
+  post  Playlist      @relation(fields: [postId], references: [id])
+  user  User          @relation(fields: [userId], references: [id])
+  likes CommentLike[]
+}
+
+model CommentLike {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  commentId Int
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  comment Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, commentId], name: "userId_commentId")
+}
+
+model PlaylistLike {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  postId    Int
+  createdAt DateTime @default(now())
+
+  user User     @relation(fields: [userId], references: [id])
+  post Playlist @relation(fields: [postId], references: [id])
+
+  @@unique([userId, postId], name: "userId_postId")
 }
