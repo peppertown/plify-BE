@@ -1,7 +1,8 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ApiTags } from '@nestjs/swagger';
 import { refreshTokenDocs, spotifyLoginDocs } from './docs/auth.docs';
+import { AuthGuard } from '@nestjs/passport';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -9,6 +10,7 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('spotify/code')
+  @UseGuards(AuthGuard('spotify'))
   @spotifyLoginDocs.operation
   @spotifyLoginDocs.body
   @spotifyLoginDocs.response
