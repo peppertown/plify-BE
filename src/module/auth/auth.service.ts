@@ -4,6 +4,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { SpotifyAuthDto } from './dto/spotify.auth.dto';
 import { JwtService } from '@nestjs/jwt';
 import { RedisService } from 'src/redis/redis.service';
+import * as jwt from 'jsonwebtoken';
 
 @Injectable()
 export class AuthService {
@@ -12,6 +13,30 @@ export class AuthService {
     private readonly jwt: JwtService,
     private readonly redis: RedisService,
   ) {}
+
+  private verifyRefreshToken(token: string): any {
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET!);
+      return decoded;
+    } catch (error) {
+      console.error('❌ 리프레시 토큰 검증 실패:', error.message);
+      throw new HttpException(
+        '유효하지 않은 토큰입니다.',
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
+  }
+
+  private filterUserFields(user: any) {
+    return {
+      userId: user.id,
+      email: user.email,
+      name: user.name,
+      nickname: user.nickname,
+      profileUrl: user.profile_url,
+      authProvider: user.auth_provider,
+    };
+  }
 
   async handleSpotifyCallback(code: string) {
     try {
@@ -127,17 +152,6 @@ export class AuthService {
       console.error(error);
       throw new HttpException('스포티파이 인증 실패', HttpStatus.BAD_REQUEST);
     }
-  }
-
-  private filterUserFields(user: any) {
-    return {
-      userId: user.id,
-      email: user.email,
-      name: user.name,
-      nickname: user.nickname,
-      profileUrl: user.profile_url,
-      authProvider: user.auth_provider,
-    };
   }
 
   async refreshSpotifyAccessToken(refreshToken: string): Promise<string> {
