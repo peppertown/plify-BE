@@ -87,6 +87,6 @@ export class PlaylistController {
     @CurrentUserId() userId: number,
     @Param('postId', ParseIntPipe) postId: number,
   ) {
-    return await this.playlistService.togglePlaylistLike(postId, userId);
+    return await this.playlistService.togglePlaylistLike(userId, postId);
   }
 }
