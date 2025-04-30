@@ -10,7 +10,9 @@ import { AuthGuard } from '@nestjs/passport';
 import { CommentService } from './comment.service';
 import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
 import { createCommentDocs } from './docs/comment.docs';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('comment')
 @Controller('comment')
 export class CommentController {
   constructor(private readonly commentService: CommentService) {}
