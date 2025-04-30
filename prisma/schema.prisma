@@ -35,7 +35,6 @@ model Playlist {
   userId     Int
   playlistId String   @unique // Spotify URL에서 추출한 실제 플레이리스트 ID
   viewCount  Int      @default(0)
-  likeCount  Int      @default(0)
   createdAt  DateTime @default(now())
 
   user         User           @relation(fields: [userId], references: [id])
@@ -48,7 +47,6 @@ model Comment {
   postId    Int
   userId    Int
   content   String
-  likeCount Int      @default(0)
   createdAt DateTime @default(now())
 
   post  Playlist      @relation(fields: [postId], references: [id])
