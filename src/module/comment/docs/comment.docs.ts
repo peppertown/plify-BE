@@ -60,3 +60,27 @@ export const deleteCommentDocs = {
     },
   }),
 };
+
+export const toggleCommentLikeDocs = {
+  operation: ApiOperation({ summary: '댓글 좋아요 토글' }),
+
+  param: ApiParam({
+    name: 'commentId',
+    type: Number,
+    required: true,
+    description: '좋아요 토글할 댓글 ID',
+  }),
+
+  response: ApiResponse({
+    description: '댓글 좋아요 토글 성공',
+    schema: {
+      example: {
+        message: {
+          code: 200,
+          text: '댓글에 좋아요를 추가했습니다. / 댓글 좋아요를 취소했습니다.',
+        },
+        liked: true,
+      },
+    },
+  }),
+};

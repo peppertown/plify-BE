@@ -10,7 +10,11 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import { CommentService } from './comment.service';
 import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
-import { createCommentDocs, deleteCommentDocs } from './docs/comment.docs';
+import {
+  createCommentDocs,
+  deleteCommentDocs,
+  toggleCommentLikeDocs,
+} from './docs/comment.docs';
 import { ApiTags } from '@nestjs/swagger';
 
 @ApiTags('comment')
@@ -47,5 +51,18 @@ export class CommentController {
     @Param('commentId', ParseIntPipe) commentId: number,
   ) {
     return await this.commentService.deleteComment(userId, commentId);
+  }
+
+  // 댓글 좋아요 토글
+  @Post('like/:commentId')
+  @UseGuards(AuthGuard('jwt'))
+  @toggleCommentLikeDocs.operation
+  @toggleCommentLikeDocs.param
+  @toggleCommentLikeDocs.response
+  async toggleCommentLike(
+    @CurrentUserId() userId: number,
+    @Param('commentId', ParseIntPipe) commentId: number,
+  ) {
+    return await this.commentService.toggleCommentLike(userId, commentId);
   }
 }
