@@ -1,4 +1,4 @@
-import { ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 
 export const createCommentDocs = {
   operation: ApiOperation({ summary: '댓글 작성 API' }),
@@ -31,6 +31,30 @@ export const createCommentDocs = {
           properties: {
             id: { type: 'number', example: 1 },
           },
+        },
+      },
+    },
+  }),
+};
+
+export const deleteCommentDocs = {
+  operation: ApiOperation({
+    summary: '댓글 삭제',
+    description: '댓글 ID를 기반으로 댓글을 삭제합니다. JWT 인증 필요.',
+  }),
+  param: ApiParam({
+    name: 'commentId',
+    required: true,
+    description: '삭제할 댓글의 ID',
+  }),
+  response: ApiResponse({
+    status: 200,
+    description: '댓글 삭제 성공',
+    schema: {
+      example: {
+        message: {
+          code: 200,
+          text: '댓글이 삭제되었습니다.',
         },
       },
     },

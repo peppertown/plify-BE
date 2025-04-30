@@ -5,11 +5,12 @@ import {
   UseGuards,
   Param,
   ParseIntPipe,
+  Delete,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { CommentService } from './comment.service';
 import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
-import { createCommentDocs } from './docs/comment.docs';
+import { createCommentDocs, deleteCommentDocs } from './docs/comment.docs';
 import { ApiTags } from '@nestjs/swagger';
 
 @ApiTags('comment')
@@ -33,5 +34,18 @@ export class CommentController {
       postId,
       body.content,
     );
+  }
+
+  // 댓글 삭제
+  @Delete(':commentId')
+  @UseGuards(AuthGuard('jwt'))
+  @deleteCommentDocs.operation
+  @deleteCommentDocs.param
+  @deleteCommentDocs.response
+  async deleteComment(
+    @CurrentUserId() userId: number,
+    @Param('commentId', ParseIntPipe) commentId: number,
+  ) {
+    return await this.commentService.deleteComment(userId, commentId);
   }
 }
