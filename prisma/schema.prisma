@@ -49,7 +49,7 @@ model Comment {
   content   String
   createdAt DateTime @default(now())
 
-  post  Playlist      @relation(fields: [postId], references: [id])
+  post  Playlist      @relation(fields: [postId], references: [id], onDelete: Cascade)
   user  User          @relation(fields: [userId], references: [id])
   likes CommentLike[]
 }
@@ -73,7 +73,7 @@ model PlaylistLike {
   createdAt DateTime @default(now())
 
   user User     @relation(fields: [userId], references: [id])
-  post Playlist @relation(fields: [postId], references: [id])
+  post Playlist @relation(fields: [postId], references: [id], onDelete: Cascade)
 
   @@unique([userId, postId], name: "userId_postId")
 }
