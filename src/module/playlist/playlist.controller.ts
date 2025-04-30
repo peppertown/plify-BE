@@ -32,6 +32,7 @@ export class PlaylistController {
     return await this.playlistService.getAllPlaylists(userId);
   }
 
+  // 플레이리스트 추가
   @Post()
   @UseGuards(AuthGuard('jwt'))
   @ApiBearerAuth()
@@ -45,6 +46,7 @@ export class PlaylistController {
     return await this.playlistService.addPlaylist(userId, body.playlistUrl);
   }
 
+  // 개별 플레이리스트 조회
   @Get(':postId')
   @UseGuards(AuthGuard('jwt'))
   @ApiBearerAuth()
