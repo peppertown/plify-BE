@@ -144,6 +144,52 @@ export class PlaylistService {
     };
   }
 
+  // 플레이리스트 좋아요 토글
+  async togglePlaylistLike(userId: number, postId: number) {
+    const existing = await this.prisma.playlistLike.findUnique({
+      where: {
+        userId_postId: {
+          userId,
+          postId,
+        },
+      },
+    });
+
+    if (existing) {
+      await this.prisma.playlistLike.delete({
+        where: { id: existing.id },
+      });
+
+      await this.prisma.playlist.update({
+        where: { id: postId },
+        data: { likeCount: { decrement: 1 } },
+      });
+
+      return {
+        message: {
+          code: 200,
+          text: '플레이리스트 좋아요가 취소되었습니다.',
+        },
+      };
+    } else {
+      await this.prisma.playlistLike.create({
+        data: { userId, postId },
+      });
+
+      await this.prisma.playlist.update({
+        where: { id: postId },
+        data: { likeCount: { increment: 1 } },
+      });
+
+      return {
+        message: {
+          code: 200,
+          text: '플레이리스트 좋아요가 추가됐습니다.',
+        },
+      };
+    }
+  }
+
   // 플레이리스트 id 추출
   extractPlaylistId(url: string): string {
     const regex = /playlist\/([a-zA-Z0-9]+)/;

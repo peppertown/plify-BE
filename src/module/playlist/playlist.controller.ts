@@ -16,6 +16,7 @@ import {
   getAllPlaylistsDocs,
   getPlaylistDocs,
   deletePlaylistDocs,
+  togglePlaylistLikeDocs,
 } from './docs/playlist.docs';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
@@ -73,5 +74,19 @@ export class PlaylistController {
     @Param('postId', ParseIntPipe) postId: number,
   ) {
     return await this.playlistService.deletePlaylist(postId, userId);
+  }
+
+  // 플레이리스트 좋아요 토글
+  @Post(':postId/like')
+  @UseGuards(AuthGuard('jwt'))
+  @ApiBearerAuth()
+  @togglePlaylistLikeDocs.operation
+  @togglePlaylistLikeDocs.param
+  @togglePlaylistLikeDocs.response
+  async togglePlaylistLike(
+    @CurrentUserId() userId: number,
+    @Param('postId', ParseIntPipe) postId: number,
+  ) {
+    return await this.playlistService.togglePlaylistLike(postId, userId);
   }
 }

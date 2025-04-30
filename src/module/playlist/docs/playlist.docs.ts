@@ -140,3 +140,23 @@ export const deletePlaylistDocs = {
     },
   }),
 };
+
+export const togglePlaylistLikeDocs = {
+  operation: ApiOperation({ summary: '플레이리스트 좋아요 토글' }),
+  param: ApiParam({
+    name: 'postId',
+    required: true,
+    description: '플레이리스트 ID',
+  }),
+  response: ApiResponse({
+    description: '좋아요 상태가 변경되었습니다.',
+    schema: {
+      example: {
+        message: {
+          code: 200,
+          text: '플레이리스트 좋아요가 추가됐습니다. / 플레이리스트 좋아요가 취소되었습니다',
+        },
+      },
+    },
+  }),
+};
