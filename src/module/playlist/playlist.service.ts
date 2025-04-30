@@ -160,11 +160,6 @@ export class PlaylistService {
         where: { id: existing.id },
       });
 
-      await this.prisma.playlist.update({
-        where: { id: postId },
-        data: { likeCount: { decrement: 1 } },
-      });
-
       return {
         message: {
           code: 200,
@@ -174,11 +169,6 @@ export class PlaylistService {
     } else {
       await this.prisma.playlistLike.create({
         data: { userId, postId },
-      });
-
-      await this.prisma.playlist.update({
-        where: { id: postId },
-        data: { likeCount: { increment: 1 } },
       });
 
       return {
