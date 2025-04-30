@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   ParseIntPipe,
@@ -14,6 +15,7 @@ import {
   addPlaylistDocs,
   getAllPlaylistsDocs,
   getPlaylistDocs,
+  deletePlaylistDocs,
 } from './docs/playlist.docs';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
@@ -58,5 +60,18 @@ export class PlaylistController {
     @Param('postId', ParseIntPipe) postId: number,
   ) {
     return await this.playlistService.getPlaylist(postId, userId);
+  }
+
+  @Delete(':postId')
+  @UseGuards(AuthGuard('jwt'))
+  @ApiBearerAuth()
+  @deletePlaylistDocs.operation
+  @deletePlaylistDocs.param
+  @deletePlaylistDocs.response
+  async deletePlaylist(
+    @CurrentUserId() userId: number,
+    @Param('postId', ParseIntPipe) postId: number,
+  ) {
+    return await this.playlistService.deletePlaylist(postId, userId);
   }
 }

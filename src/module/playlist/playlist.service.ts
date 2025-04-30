@@ -111,6 +111,39 @@ export class PlaylistService {
     };
   }
 
+  // 플레이리스트 삭제
+  async deletePlaylist(postId: number, userId: number) {
+    // 플레이리스트 존재 여부 및 작성자 확인
+    const playlist = await this.prisma.playlist.findUnique({
+      where: { id: postId },
+    });
+
+    if (!playlist) {
+      throw new HttpException(
+        '플레이리스트를 찾을 수 없습니다.',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    if (playlist.userId !== userId) {
+      throw new HttpException(
+        '플레이리스트를 삭제할 권한이 없습니다.',
+        HttpStatus.FORBIDDEN,
+      );
+    }
+
+    await this.prisma.playlist.delete({
+      where: { id: postId },
+    });
+
+    return {
+      message: {
+        code: 200,
+        text: '플레이리스트가 삭제되었습니다.',
+      },
+    };
+  }
+
   // 플레이리스트 id 추출
   extractPlaylistId(url: string): string {
     const regex = /playlist\/([a-zA-Z0-9]+)/;

@@ -116,3 +116,27 @@ export const getPlaylistDocs = {
     },
   }),
 };
+
+export const deletePlaylistDocs = {
+  operation: ApiOperation({
+    summary: '플레이리스트 삭제',
+    description: '플레이리스트를 삭제합니다.',
+  }),
+  param: ApiParam({
+    name: 'postId',
+    description: '삭제할 플레이리스트 ID',
+    example: 1,
+  }),
+  response: ApiResponse({
+    status: 200,
+    description: '삭제 성공',
+    schema: {
+      example: {
+        message: {
+          code: 200,
+          text: '플레이리스트가 삭제되었습니다.',
+        },
+      },
+    },
+  }),
+};
