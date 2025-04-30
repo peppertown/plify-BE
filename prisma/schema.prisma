@@ -14,20 +14,22 @@ datasource db {
 }
 
 model User {
-  id             Int            @id @default(autoincrement())
-  spotifyId      String?        @unique
-  email          String         @unique
+  id             Int             @id @default(autoincrement())
+  spotifyId      String?         @unique
+  email          String          @unique
   name           String
-  nickname       String         @unique
+  nickname       String          @unique
   auth_provider  String
   profile_url    String?
   password       String?
-  followersCount Int            @default(0)
-  createdAt      DateTime       @default(now())
+  followersCount Int             @default(0)
+  createdAt      DateTime        @default(now())
   Playlist       Playlist[]
   Comment        Comment[]
   CommentLike    CommentLike[]
   PlaylistLike   PlaylistLike[]
+  UserTopArtist  UserTopArtist[]
+  UserTopTrack   UserTopTrack[]
 }
 
 model Playlist {
@@ -76,4 +78,36 @@ model PlaylistLike {
   post Playlist @relation(fields: [postId], references: [id], onDelete: Cascade)
 
   @@unique([userId, postId], name: "userId_postId")
+}
+
+model UserTopArtist {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  rank        Int
+  artistId    String
+  name        String
+  imageUrl    String?
+  externalUrl String
+  snapshotAt  DateTime @default(now()) // 언제 스냅샷했는지
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([userId, artistId, snapshotAt])
+}
+
+model UserTopTrack {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  rank        Int
+  trackId     String
+  name        String
+  imageUrl    String?
+  artistId    String
+  artistName  String
+  externalUrl String
+  snapshotAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([userId, trackId, snapshotAt])
 }
