@@ -54,3 +54,54 @@ export const getUserTopTracksDocs = {
     }),
   ),
 };
+
+export const getUserTopArtistsDocs = {
+  operation: ApiOperation({
+    summary: '유저 탑 아티스트 조회',
+    description: 'Spotify code로 유저의 top artists 랭킹을 조회합니다.',
+  }),
+
+  body: ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        code: {
+          type: 'string',
+          description: 'Spotify 엑세스 토큰',
+          example: 'Spotify 엑세스 토큰',
+        },
+        range: {
+          type: 'string',
+          description: '랭킹 기준 기간',
+          example: 'short | medium | long', // short, medium, long
+          enum: ['short', 'medium', 'long'],
+        },
+      },
+    },
+  }),
+
+  response: applyDecorators(
+    ApiResponse({
+      status: 200,
+      description: '랭킹 조회 성공',
+      schema: {
+        example: {
+          message: {
+            code: 200,
+            text: '랭킹 조회가 완료됐습니다.',
+          },
+          rank: [
+            {
+              rank: '랭크',
+              artistId: '아티스트의 스포티파이 아이디',
+              name: '아티스트 이름',
+              imageUrl: '아티스트 이미지 URL',
+              externalUrl: '해당 아티스트 스포티파이 주소',
+              diff: '순위 변동값 / diff > 0 순위 상승, diff < 0 순위 하락, diff = null 랭킹 신규 진입',
+            },
+          ],
+        },
+      },
+    }),
+  ),
+};

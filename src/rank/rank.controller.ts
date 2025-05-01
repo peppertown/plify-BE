@@ -3,7 +3,7 @@ import { RankService } from './rank.service';
 import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { getUserTopTracksDocs } from './docs/rank.docs';
+import { getUserTopArtistsDocs, getUserTopTracksDocs } from './docs/rank.docs';
 
 @ApiTags('rank')
 @Controller('rank')
@@ -29,6 +29,9 @@ export class RankController {
 
   @Post('artist')
   @UseGuards(AuthGuard('jwt'))
+  @getUserTopArtistsDocs.operation
+  @getUserTopArtistsDocs.body
+  @getUserTopArtistsDocs.response
   async test(
     @CurrentUserId() userId: number,
     @Body() body: { code: string; range: string },
