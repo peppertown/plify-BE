@@ -69,6 +69,7 @@ export class PlaylistService {
 
       return {
         comment,
+        commentCount: comment.length,
         message: {
           code: 200,
           text: '개별 플레이리스트를 정상적으로 조회했습니다.',

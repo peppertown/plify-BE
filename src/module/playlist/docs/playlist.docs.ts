@@ -110,6 +110,7 @@ export const getPlaylistDocs = {
             isLiked: '좋아요 여부',
           },
         ],
+        commentCount: '댓글 개수',
         message: {
           code: 200,
           text: '개별 플레이리스트를 정상적으로 조회했습니다.',
