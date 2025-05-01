@@ -81,18 +81,19 @@ model PlaylistLike {
 }
 
 model UserTopArtist {
-  id          Int      @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())
   userId      Int
   rank        Int
   artistId    String
   name        String
   imageUrl    String?
   externalUrl String
-  snapshotAt  DateTime @default(now()) // 언제 스냅샷했는지
+  snapshotAt  DateTime  @default(now())
+  timeRange   TimeRange
 
   user User @relation(fields: [userId], references: [id])
 
-  @@unique([userId, artistId, snapshotAt])
+  @@unique([userId, artistId, timeRange])
 }
 
 model UserTopTrack {
