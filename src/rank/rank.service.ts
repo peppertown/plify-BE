@@ -118,6 +118,8 @@ export class RankService {
         spotifyAccessToken,
         timeRange,
       );
+
+      await this.saveUserTopArtist(currentRank, userId, timeRange);
     }
   }
 
@@ -192,5 +194,15 @@ export class RankService {
       timeRange,
     }));
     await this.prisma.userTopTrack.createMany({ data });
+  }
+
+  // 유저 탑 아티스트 DB에 저장
+  async saveUserTopArtist(result: any, userId: number, timeRange: string) {
+    const data = result.map((res) => ({
+      ...res,
+      userId,
+      timeRange,
+    }));
+    await this.prisma.userTopArtist.createMany({ data });
   }
 }
