@@ -26,4 +26,17 @@ export class RankController {
       body.range,
     );
   }
+
+  @Post('artist')
+  @UseGuards(AuthGuard('jwt'))
+  async test(
+    @CurrentUserId() userId: number,
+    @Body() body: { code: string; range: string },
+  ) {
+    return await this.rankService.handleUserTopArtists(
+      body.code,
+      userId,
+      body.range,
+    );
+  }
 }

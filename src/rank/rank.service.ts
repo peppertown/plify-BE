@@ -101,9 +101,11 @@ export class RankService {
     userId: number,
     range: string,
   ) {
+    console.log('timerange');
     // timeRange 설정
     const timeRange = this.getTimeRange(range);
 
+    console.log('db조회');
     // DB에서 유저의 탑 아티스트 조회
     const previousRank = await this.prisma.userTopArtist.findMany({
       where: { userId, timeRange },
@@ -120,6 +122,58 @@ export class RankService {
       );
 
       await this.saveUserTopArtist(currentRank, userId, timeRange);
+
+      const rank = currentRank.map((data) => ({
+        ...data,
+        diff: 0, // 첫 랭킹 확인이라 순위 변동 X
+      }));
+
+      return {
+        message: {
+          code: 200,
+          text: '랭킹 조회가 완료됐습니다.',
+        },
+        rank,
+      };
+    }
+
+    // 랭킹 변동값 측정 주기(하루)가 지났는지 확인
+    const now = new Date();
+    const ONE_DAY = 24 * 60 * 60 * 1000;
+    const shouldUpdate = now.getTime() - lastSnapshot.getTime() > ONE_DAY;
+
+    // 주기 지났을 시 새로운 데이터 받아오고 기존 데이터 삭제 후 저장
+    if (shouldUpdate) {
+      const currentRank = await this.fetchSpotifyTopArtists(
+        spotifyAccessToken,
+        timeRange,
+      );
+
+      await this.prisma.userTopArtist.deleteMany({
+        where: { userId, timeRange },
+      });
+
+      await this.saveUserTopArtist(currentRank, userId, timeRange);
+
+      // 랭킹 변동값 측정
+      const rank = currentRank.map((curr) => {
+        const prev = previousRank.find((p) => p.artistId === curr.artistId);
+
+        const diff = prev ? prev.rank - curr.rank : null;
+
+        return {
+          ...curr,
+          diff, // 숫자 or null(랭킹 신규 진입)
+        };
+      });
+
+      return {
+        message: {
+          code: 200,
+          text: '랭킹 조회가 완료됐습니다.',
+        },
+        rank,
+      };
     }
   }
 
@@ -166,7 +220,7 @@ export class RankService {
   }
 
   async fetchSpotifyTopArtists(userAccessToken: string, term: string) {
-    const url = `https://api.spotify.com/v1/me/top/artists?&limit=50&time_range=${term}`;
+    const url = `https://api.spotify.com/v1/me/top/artists?time_range=${term}&limit=50`;
 
     const response = await axios.get(url, {
       headers: {
@@ -178,12 +232,12 @@ export class RankService {
     const data = response.data.items.map((item, i) => ({
       rank: i + 1,
       artistId: item.id,
-      artistName: item.name,
+      name: item.name,
       imageUrl: item.images[0]?.url,
       externalUrl: item.external_urls.spotify,
     }));
 
-    return { data };
+    return data;
   }
 
   // 유저 탑 트랙 DB에 저장
