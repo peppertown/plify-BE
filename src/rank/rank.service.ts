@@ -6,9 +6,21 @@ import { PrismaService } from 'src/prisma/prisma.service';
 export class RankService {
   constructor(private readonly prisma: PrismaService) {}
 
+  async handleUserTopTracks(spotifyAccessToken: string, userId: number) {
+    const previousRank = await this.prisma.userTopTrack.findMany({
+      where: { userId },
+      orderBy: { rank: 'desc' },
+    });
+    const lastSnapshot = previousRank[0]?.snapshotAt;
+    if (!lastSnapshot) {
+      const currentRank = await this.fetchSpotifyTopTracks(spotifyAccessToken);
+      await this.saveUserTopTrack(currentRank, userId);
+    }
+  }
+
   // 유저 탑 트랙 조회 (스포티파이)
   async fetchSpotifyTopTracks(userAccessToken: string) {
-    const url = `https://api.spotify.com/v1/me/top/tracks`;
+    const url = `https://api.spotify.com/v1/me/top/tracks?limit=50`;
 
     const response = await axios.get(url, {
       headers: {
@@ -30,19 +42,12 @@ export class RankService {
     return data;
   }
 
-  async handleUserTopTracks(spotifyAccessToken: string, userId: number) {
-    const previousRank = await this.prisma.userTopTrack.findMany({
-      where: { userId },
-      orderBy: { rank: 'desc' },
-    });
-    const lastSnapshot = previousRank[0]?.snapshotAt;
-    if (!lastSnapshot) {
-      const currentRank = await this.fetchSpotifyTopTracks(spotifyAccessToken);
-      const data = currentRank.map((track) => ({
-        ...track,
-        userId,
-      }));
-      await this.prisma.userTopTrack.createMany({ data });
-    }
+  // 유저 탑 트랙 DB에 저장
+  async saveUserTopTrack(result: any, userId: number) {
+    const data = result.map((res) => ({
+      ...res,
+      userId,
+    }));
+    await this.prisma.userTopTrack.createMany({ data });
   }
 }
