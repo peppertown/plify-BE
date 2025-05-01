@@ -158,11 +158,11 @@ export class AuthService {
     try {
       // 1. JWT refreshToken 검증 및 유저 ID 파악
       const decoded = this.verifyRefreshToken(refreshToken);
-      const userId = decoded.sub;
+      const userId = decoded.userId;
 
       // 2. Redis에서 Spotify refreshToken 가져오기
       const spotifyRefreshToken = await this.redis.get(
-        `spotify:refresh:${userId}`,
+        `spotify_refresh_token:${userId}`,
       );
       if (!spotifyRefreshToken) {
         throw new Error('Spotify refresh token을 찾을 수 없습니다');
