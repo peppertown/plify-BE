@@ -132,6 +132,27 @@ export class RankService {
     return data;
   }
 
+  async fetchSpotifyTopArtists(userAccessToken: string) {
+    const url = `https://api.spotify.com/v1/me/top/artists?&limit=50`;
+
+    const response = await axios.get(url, {
+      headers: {
+        Authorization: `Bearer ${userAccessToken}`,
+        'Accept-Language': 'ko',
+      },
+    });
+
+    const data = response.data.items.map((item, i) => ({
+      rank: i + 1,
+      artistId: item.id,
+      artistName: item.name,
+      imageUrl: item.images[0]?.url,
+      externalUrl: item.external_urls.spotify,
+    }));
+
+    return { data };
+  }
+
   // 유저 탑 트랙 DB에 저장
   async saveUserTopTrack(result: any, userId: number, timeRange: string) {
     const data = result.map((res) => ({
