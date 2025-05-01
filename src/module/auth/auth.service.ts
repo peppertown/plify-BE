@@ -211,13 +211,22 @@ export class AuthService {
         },
       });
 
+      const user = {
+        userId,
+        email: userData.email,
+        name: userData.display_name,
+        nickname: userData.display_name,
+        profileUrl: userData.images[0].url,
+        authProvider: 'spotify',
+      };
+
       // 8. 응답
       return {
         message: {
           code: 200,
           message: '토큰 재발급 성공',
         },
-        user: spotifyUser,
+        user,
         jwt: {
           accessToken: newAccessToken,
           refreshToken: newRefreshToken,
