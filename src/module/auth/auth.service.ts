@@ -179,12 +179,45 @@ export class AuthService {
       // 5. Redis에 새로운 JWT refreshToken 저장
       await this.saveServerRefreshToken(userId, newRefreshToken);
 
-      // 6. 응답
+      // 6. 새로운 엑세스 토큰으로 유저 데이터 조회
+      const userInfoResponse = await axios.get(
+        'https://api.spotify.com/v1/me',
+        {
+          headers: { Authorization: `Bearer ${spotifyAccessToken}` },
+        },
+      );
+      const userData = userInfoResponse.data;
+
+      if (!userData.id) {
+        throw new Error('Spotify 사용자 ID를 가져올 수 없음');
+      }
+
+      // 7. 유저 데이터 매핑 후 DB 저장
+      const spotifyUser: SpotifyAuthDto = {
+        spotifyId: userData.id,
+        email: userData.email || `${userData.id}@spotify.com`,
+        displayName: userData.display_name || userData.id,
+        profileImageUrl: userData.images?.[0]?.url || null,
+        followersCount: userData.followers?.total || 0,
+      };
+
+      await this.prisma.user.update({
+        where: { id: userId },
+        data: {
+          email: spotifyUser.email,
+          name: spotifyUser.displayName,
+          profile_url: spotifyUser.profileImageUrl,
+          followersCount: spotifyUser.followersCount,
+        },
+      });
+
+      // 8. 응답
       return {
         message: {
           code: 200,
           message: '토큰 재발급 성공',
         },
+        user: spotifyUser,
         jwt: {
           accessToken: newAccessToken,
           refreshToken: newRefreshToken,
