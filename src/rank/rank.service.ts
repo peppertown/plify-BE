@@ -12,19 +12,7 @@ export class RankService {
     range: string,
   ) {
     // timeRange 설정
-    const timeRangeMap = {
-      short: 'short_term',
-      medium: 'medium_term',
-      long: 'long_term',
-    } as const;
-
-    const timeRange = timeRangeMap[range as keyof typeof timeRangeMap];
-
-    if (!timeRange) {
-      throw new Error(
-        '잘못된 range 값입니다. short, medium, long 중 하나여야 합니다.',
-      );
-    }
+    const timeRange = this.getTimeRange(range);
 
     // DB에서 유저의 랭킹(탑트랙) 조회
     const previousRank = await this.prisma.userTopTrack.findMany({
@@ -106,6 +94,24 @@ export class RankService {
       },
       rank,
     };
+  }
+
+  getTimeRange(range: string) {
+    const timeRangeMap = {
+      short: 'short_term',
+      medium: 'medium_term',
+      long: 'long_term',
+    } as const;
+
+    const timeRange = timeRangeMap[range as keyof typeof timeRangeMap];
+
+    if (!timeRange) {
+      throw new Error(
+        '잘못된 range 값입니다. short, medium, long 중 하나여야 합니다.',
+      );
+    }
+
+    return timeRange;
   }
 
   // 유저 탑 트랙 조회 (스포티파이)
