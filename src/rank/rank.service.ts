@@ -96,6 +96,31 @@ export class RankService {
     };
   }
 
+  async handleUserTopArtists(
+    spotifyAccessToken: string,
+    userId: number,
+    range: string,
+  ) {
+    // timeRange 설정
+    const timeRange = this.getTimeRange(range);
+
+    // DB에서 유저의 탑 아티스트 조회
+    const previousRank = await this.prisma.userTopArtist.findMany({
+      where: { userId, timeRange },
+      orderBy: { rank: 'asc' },
+    });
+
+    // 랭킹 조회 시점 확인
+    const lastSnapshot = previousRank[0]?.snapshotAt;
+
+    if (!lastSnapshot) {
+      const currentRank = await this.fetchSpotifyTopArtists(
+        spotifyAccessToken,
+        timeRange,
+      );
+    }
+  }
+
   getTimeRange(range: string) {
     const timeRangeMap = {
       short: 'short_term',
@@ -138,8 +163,8 @@ export class RankService {
     return data;
   }
 
-  async fetchSpotifyTopArtists(userAccessToken: string) {
-    const url = `https://api.spotify.com/v1/me/top/artists?&limit=50`;
+  async fetchSpotifyTopArtists(userAccessToken: string, term: string) {
+    const url = `https://api.spotify.com/v1/me/top/artists?&limit=50&time_range=${term}`;
 
     const response = await axios.get(url, {
       headers: {
