@@ -6,10 +6,29 @@ import { PrismaService } from 'src/prisma/prisma.service';
 export class RankService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async handleUserTopTracks(spotifyAccessToken: string, userId: number) {
+  async handleUserTopTracks(
+    spotifyAccessToken: string,
+    userId: number,
+    range: string,
+  ) {
+    // timeRange 설정
+    const timeRangeMap = {
+      short: 'short_term',
+      medium: 'medium_term',
+      long: 'long_term',
+    } as const;
+
+    const timeRange = timeRangeMap[range as keyof typeof timeRangeMap];
+
+    if (!timeRange) {
+      throw new Error(
+        '잘못된 range 값입니다. short, medium, long 중 하나여야 합니다.',
+      );
+    }
+
     // DB에서 유저의 랭킹(탑트랙) 조회
     const previousRank = await this.prisma.userTopTrack.findMany({
-      where: { userId },
+      where: { userId, timeRange },
       orderBy: { rank: 'asc' },
     });
 
@@ -18,8 +37,11 @@ export class RankService {
 
     // 랭킹 조회 시점 없을 시 (랭킹 첫 확인일 시) 예외처리
     if (!lastSnapshot) {
-      const currentRank = await this.fetchSpotifyTopTracks(spotifyAccessToken);
-      await this.saveUserTopTrack(currentRank, userId);
+      const currentRank = await this.fetchSpotifyTopTracks(
+        spotifyAccessToken,
+        timeRange,
+      );
+      await this.saveUserTopTrack(currentRank, userId, timeRange);
 
       const rank = currentRank.map((data) => ({
         ...data,
@@ -42,9 +64,14 @@ export class RankService {
 
     // 주기 지났을 시 새로운 데이터 받아오고 기존 데이터 삭제 후 저장
     if (shouldUpdate) {
-      const currentRank = await this.fetchSpotifyTopTracks(spotifyAccessToken);
-      await this.prisma.userTopTrack.deleteMany({ where: { userId } });
-      await this.saveUserTopTrack(currentRank, userId);
+      const currentRank = await this.fetchSpotifyTopTracks(
+        spotifyAccessToken,
+        timeRange,
+      );
+      await this.prisma.userTopTrack.deleteMany({
+        where: { userId, timeRange },
+      });
+      await this.saveUserTopTrack(currentRank, userId, timeRange);
 
       // 랭킹 변동값 측정
       const rank = currentRank.map((curr) => {
@@ -82,8 +109,8 @@ export class RankService {
   }
 
   // 유저 탑 트랙 조회 (스포티파이)
-  async fetchSpotifyTopTracks(userAccessToken: string) {
-    const url = `https://api.spotify.com/v1/me/top/tracks?limit=50`;
+  async fetchSpotifyTopTracks(userAccessToken: string, term: string) {
+    const url = `https://api.spotify.com/v1/me/top/tracks?time_range=${term}&limit=50`;
 
     const response = await axios.get(url, {
       headers: {
@@ -106,10 +133,11 @@ export class RankService {
   }
 
   // 유저 탑 트랙 DB에 저장
-  async saveUserTopTrack(result: any, userId: number) {
+  async saveUserTopTrack(result: any, userId: number, timeRange: string) {
     const data = result.map((res) => ({
       ...res,
       userId,
+      timeRange,
     }));
     await this.prisma.userTopTrack.createMany({ data });
   }
