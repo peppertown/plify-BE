@@ -1,15 +1,22 @@
-import { Body, Controller, Get, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import { RankService } from './rank.service';
 import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
 import { AuthGuard } from '@nestjs/passport';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { getUserTopTracksDocs } from './docs/rank.docs';
 
+@ApiTags('rank')
 @Controller('rank')
 export class RankController {
   constructor(private readonly rankService: RankService) {}
 
-  @Get('track')
+  @Post('track')
   @UseGuards(AuthGuard('jwt'))
-  async test(
+  @ApiBearerAuth()
+  @getUserTopTracksDocs.operation
+  @getUserTopTracksDocs.body
+  @getUserTopTracksDocs.response
+  async getUserTopTracks(
     @CurrentUserId() userId: number,
     @Body() body: { code: string; range: string },
   ) {
