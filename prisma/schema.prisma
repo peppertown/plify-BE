@@ -96,7 +96,7 @@ model UserTopArtist {
 }
 
 model UserTopTrack {
-  id          Int      @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())
   userId      Int
   rank        Int
   trackId     String
@@ -105,9 +105,16 @@ model UserTopTrack {
   artistId    String
   artistName  String
   externalUrl String
-  snapshotAt  DateTime @default(now())
+  snapshotAt  DateTime  @default(now())
+  timeRange   TimeRange
 
   user User @relation(fields: [userId], references: [id])
 
-  @@unique([userId, trackId, snapshotAt])
+  @@unique([userId, trackId, snapshotAt, timeRange])
+}
+
+enum TimeRange {
+  short_term
+  medium_term
+  long_term
 }
