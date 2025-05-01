@@ -1,8 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import axios from 'axios';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class RankService {
+  constructor(private readonly prisma: PrismaService) {}
+
   // 유저 탑 트랙 조회 (스포티파이)
   async fetchSpotifyTopTracks(userAccessToken: string) {
     const url = `https://api.spotify.com/v1/me/top/tracks`;
@@ -25,5 +28,21 @@ export class RankService {
     }));
 
     return data;
+  }
+
+  async handleUserTopTracks(spotifyAccessToken: string, userId: number) {
+    const previousRank = await this.prisma.userTopTrack.findMany({
+      where: { userId },
+      orderBy: { rank: 'desc' },
+    });
+    const lastSnapshot = previousRank[0]?.snapshotAt;
+    if (!lastSnapshot) {
+      const currentRank = await this.fetchSpotifyTopTracks(spotifyAccessToken);
+      const data = currentRank.map((track) => ({
+        ...track,
+        userId,
+      }));
+      await this.prisma.userTopTrack.createMany({ data });
+    }
   }
 }
