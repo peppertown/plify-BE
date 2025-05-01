@@ -19,6 +19,8 @@ export const getAllPlaylistsDocs = {
             userProfileUrl: '유저 프로필 사진 url',
             postId: '아이디',
             playlistId: '플레이 리스트 아이디',
+            likeCount: '좋아요 수',
+            commentCount: '댓글 수',
             isLiked: '좋아요 여부',
             viewCount: '조회수',
             createdAt: '생성 일자',

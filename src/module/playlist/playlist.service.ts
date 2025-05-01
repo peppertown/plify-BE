@@ -10,7 +10,8 @@ export class PlaylistService {
     const result = await this.prisma.playlist.findMany({
       orderBy: { id: 'desc' },
       include: {
-        _count: { select: { PlaylistLike: true } },
+        _count: { select: { PlaylistLike: true, Comment: true } },
+
         PlaylistLike: { where: { userId }, select: { id: true } },
         user: {
           select: {
@@ -203,6 +204,7 @@ export class PlaylistService {
       postId: result.id,
       playlistId: result.playlistId,
       likeCount: result._count.PlaylistLike,
+      commentCount: result._count.Comment,
       isLiked: !!result.PlaylistLike[0],
       viewCount: result.viewCount,
       createdAt: result.createdAt,
