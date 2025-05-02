@@ -229,13 +229,32 @@ export class RankService {
       },
     });
 
-    const data = response.data.items.map((item, i) => ({
-      rank: i + 1,
-      artistId: item.id,
-      name: item.name,
-      imageUrl: item.images[0]?.url,
-      externalUrl: item.external_urls.spotify,
-    }));
+    const genreMap = new Map();
+
+    const data = response.data.items.map((item, i) => {
+      const artistInfo = {
+        rank: i + 1,
+        artistId: item.id,
+        name: item.name,
+        imageUrl: item.images?.[0]?.url || null,
+        externalUrl: item.external_urls?.spotify || null,
+      };
+
+      item.genres?.forEach((genre: string) => {
+        if (!genreMap.has(genre)) {
+          genreMap.set(genre, []);
+        }
+        genreMap.get(genre)!.push(artistInfo);
+      });
+
+      return artistInfo;
+    });
+
+    const sortedGenres = Array.from(genreMap.entries()).sort(
+      (a, b) => b[1].length - a[1].length,
+    );
+
+    const genres = Object.fromEntries(sortedGenres);
 
     return data;
   }
