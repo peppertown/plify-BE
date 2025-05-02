@@ -114,6 +114,15 @@ model UserTopTrack {
   @@unique([userId, trackId, snapshotAt, timeRange])
 }
 
+model UserTopGenre {
+  id         Int       @id @default(autoincrement())
+  userId     Int
+  rank       Int
+  genre      String
+  artistData String @db.Text
+  timeRange  TimeRange
+}
+
 enum TimeRange {
   short_term
   medium_term
