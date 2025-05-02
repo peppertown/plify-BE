@@ -32,7 +32,7 @@ export class RankController {
   @getUserTopArtistsDocs.operation
   @getUserTopArtistsDocs.body
   @getUserTopArtistsDocs.response
-  async test(
+  async handleUserTopArtists(
     @CurrentUserId() userId: number,
     @Body() body: { code: string; range: string },
   ) {
