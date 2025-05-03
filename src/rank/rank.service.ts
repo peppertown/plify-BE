@@ -114,12 +114,15 @@ export class RankService {
     const lastSnapshot = previousRank[0]?.snapshotAt;
 
     if (!lastSnapshot) {
-      const currentRank = await this.fetchSpotifyTopArtists(
+      const { data, genres } = await this.fetchSpotifyTopArtists(
         spotifyAccessToken,
         timeRange,
       );
 
+      const currentRank = data;
+
       await this.saveUserTopArtist(currentRank, userId, timeRange);
+      await this.saveUserTopGenres(range, genres);
 
       const rank = currentRank.map((data) => ({
         ...data,
@@ -142,16 +145,19 @@ export class RankService {
 
     // 주기 지났을 시 새로운 데이터 받아오고 기존 데이터 삭제 후 저장
     if (shouldUpdate) {
-      const currentRank = await this.fetchSpotifyTopArtists(
+      const { data, genres } = await this.fetchSpotifyTopArtists(
         spotifyAccessToken,
         timeRange,
       );
+
+      const currentRank = data;
 
       await this.prisma.userTopArtist.deleteMany({
         where: { userId, timeRange },
       });
 
       await this.saveUserTopArtist(currentRank, userId, timeRange);
+      await this.saveUserTopGenres(range, genres);
 
       // 랭킹 변동값 측정
       const rank = currentRank.map((curr) => {
@@ -261,7 +267,11 @@ export class RankService {
       return artistInfo;
     });
 
-    return data;
+    const genres = Object.fromEntries(
+      Array.from(genreMap.entries()).sort((a, b) => b[1].length - a[1].length),
+    );
+
+    return { data, genres };
   }
 
   // 유저 탑 트랙 DB에 저장
