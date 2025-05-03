@@ -101,11 +101,9 @@ export class RankService {
     userId: number,
     range: string,
   ) {
-    console.log('timerange');
     // timeRange 설정
     const timeRange = this.getTimeRange(range);
 
-    console.log('db조회');
     // DB에서 유저의 탑 아티스트 조회
     const previousRank = await this.prisma.userTopArtist.findMany({
       where: { userId, timeRange },
@@ -250,12 +248,6 @@ export class RankService {
       return artistInfo;
     });
 
-    const sortedGenres = Array.from(genreMap.entries()).sort(
-      (a, b) => b[1].length - a[1].length,
-    );
-
-    const genres = Object.fromEntries(sortedGenres);
-
     return data;
   }
 
@@ -277,5 +269,24 @@ export class RankService {
       timeRange,
     }));
     await this.prisma.userTopArtist.createMany({ data });
+  }
+
+  async saveUserTopGenres(timeRange: string, genreMap: string) {
+    const parsedTimeRange = this.getTimeRange(timeRange);
+
+    const genreData = Object.entries(genreMap).map(
+      ([genre, artists], index) => ({
+        userId: 3,
+        rank: index + 1, // 많이 들은 장르일수록 앞에 있으니 1부터 부여
+        genre,
+        artistData: JSON.stringify(artists), // 배열 -> 문자열로 변환
+        timeRange: parsedTimeRange,
+      }),
+    );
+
+    await this.prisma.userTopGenre.createMany({
+      data: genreData,
+      skipDuplicates: true, // 혹시 중복된 값이 있으면 무시
+    });
   }
 }
