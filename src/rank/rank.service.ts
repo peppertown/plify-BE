@@ -173,6 +173,19 @@ export class RankService {
         rank,
       };
     }
+
+    const rank = previousRank.map((data) => ({
+      ...data,
+      diff: 0,
+    }));
+
+    return {
+      message: {
+        code: 200,
+        text: '랭킹 조회가 완료됐습니다.',
+      },
+      rank,
+    };
   }
 
   getTimeRange(range: string) {
