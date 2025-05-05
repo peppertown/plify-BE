@@ -122,7 +122,7 @@ export class RankService {
       const currentRank = data;
 
       await this.saveUserTopArtist(currentRank, userId, timeRange);
-      await this.saveUserTopGenres(range, genres);
+      await this.saveUserTopGenres(range, genres, userId);
 
       const rank = currentRank.map((data) => ({
         ...data,
@@ -156,8 +156,12 @@ export class RankService {
         where: { userId, timeRange },
       });
 
+      await this.prisma.userTopGenre.deleteMany({
+        where: { userId, timeRange },
+      });
+
       await this.saveUserTopArtist(currentRank, userId, timeRange);
-      await this.saveUserTopGenres(range, genres);
+      await this.saveUserTopGenres(range, genres, userId);
 
       // 랭킹 변동값 측정
       const rank = currentRank.map((curr) => {
@@ -294,12 +298,12 @@ export class RankService {
     await this.prisma.userTopArtist.createMany({ data });
   }
 
-  async saveUserTopGenres(timeRange: string, genreMap: string) {
+  async saveUserTopGenres(timeRange: string, genreMap: string, userId: number) {
     const parsedTimeRange = this.getTimeRange(timeRange);
 
     const genreData = Object.entries(genreMap).map(
       ([genre, artists], index) => ({
-        userId: 3,
+        userId,
         rank: index + 1, // 많이 들은 장르일수록 앞에 있으니 1부터 부여
         genre,
         artistData: JSON.stringify(artists), // 배열 -> 문자열로 변환
@@ -309,7 +313,6 @@ export class RankService {
 
     await this.prisma.userTopGenre.createMany({
       data: genreData,
-      skipDuplicates: true, // 혹시 중복된 값이 있으면 무시
     });
   }
 }
