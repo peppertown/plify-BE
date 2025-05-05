@@ -6,7 +6,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { RedisModule } from './redis/redis.module';
 import { PlaylistModule } from './module/playlist/playlist.module';
 import { CommentModule } from './module/comment/comment.module';
-import { RankModule } from './rank/rank.module';
+import { RankModule } from './module/rank/rank.module';
 
 @Module({
   imports: [
