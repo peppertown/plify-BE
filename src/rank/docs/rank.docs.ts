@@ -1,5 +1,5 @@
 import { applyDecorators } from '@nestjs/common';
-import { ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
 
 export const getUserTopTracksDocs = {
   operation: applyDecorators(
@@ -104,4 +104,53 @@ export const getUserTopArtistsDocs = {
       },
     }),
   ),
+};
+
+export const getUserTopGenresDocs = {
+  operation: ApiOperation({
+    summary: '유저 탑 장르 조회 API',
+    description:
+      'Spotify 데이터를 기반으로 유저가 가장 많이 듣는 장르를 조회합니다.',
+  }),
+
+  query: ApiQuery({
+    name: 'range',
+    required: true,
+    example: 'short',
+    description: '조회 범위 (short | medium | long)',
+  }),
+
+  response: ApiResponse({
+    status: 200,
+    description: '장르 조회 성공',
+    schema: {
+      example: {
+        message: {
+          code: 200,
+          text: '장르 조회가 완료됐습니다.',
+        },
+        genres: [
+          {
+            userId: '유저 아이디 | number',
+            rank: '순위 | number',
+            genre: '장르 이름 | string',
+            artistData: [
+              {
+                id: '아티스트 아이디 | number',
+                name: '아티스트 이름 | string',
+                imageUrl: '아티스트 이미지 url | string',
+                externalUrl: '아티스트 외부 url | string',
+              },
+              {
+                id: '아티스트 아이디 | number',
+                name: '아티스트 이름 | string',
+                imageUrl: '아티스트 이미지 url | string',
+                externalUrl: '아티스트 외부 url | string',
+              },
+            ],
+          },
+        ],
+      },
+    },
+  }),
 };

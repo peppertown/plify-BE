@@ -315,4 +315,31 @@ export class RankService {
       data: genreData,
     });
   }
+
+  async getUserTopGenres(userId: number, range: string) {
+    const timeRange = this.getTimeRange(range);
+
+    const result = await this.prisma.userTopGenre.findMany({
+      where: { userId, timeRange },
+    });
+    const genres = result.map((res) => ({
+      userId: res.userId,
+      rank: res.rank,
+      genre: res.genre,
+      artistData: JSON.parse(res.artistData).map((data) => ({
+        id: data.artistId,
+        name: data.name,
+        imageUrl: data.imageUrl,
+        externalUrl: data.externalUrl,
+      })),
+    }));
+
+    return {
+      message: {
+        code: 200,
+        text: '장르 조회가 완료됐습니다.',
+      },
+      genres,
+    };
+  }
 }

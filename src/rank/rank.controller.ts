@@ -1,9 +1,13 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
 import { RankService } from './rank.service';
 import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { getUserTopArtistsDocs, getUserTopTracksDocs } from './docs/rank.docs';
+import {
+  getUserTopArtistsDocs,
+  getUserTopGenresDocs,
+  getUserTopTracksDocs,
+} from './docs/rank.docs';
 
 @ApiTags('rank')
 @Controller('rank')
@@ -41,5 +45,18 @@ export class RankController {
       userId,
       body.range,
     );
+  }
+
+  @Get('genre')
+  @UseGuards(AuthGuard('jwt'))
+  @ApiBearerAuth()
+  @getUserTopGenresDocs.operation
+  @getUserTopGenresDocs.query
+  @getUserTopGenresDocs.response
+  async getUserTopGenres(
+    @CurrentUserId() userId: number,
+    @Query() query: { range: string },
+  ) {
+    return await this.rankService.getUserTopGenres(userId, query.range);
   }
 }
