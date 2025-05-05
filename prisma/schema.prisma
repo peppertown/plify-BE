@@ -119,7 +119,7 @@ model UserTopGenre {
   userId     Int
   rank       Int
   genre      String
-  artistData String @db.Text
+  artistData String    @db.Text
   timeRange  TimeRange
 }
 
