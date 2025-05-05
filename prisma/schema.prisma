@@ -119,8 +119,9 @@ model UserTopGenre {
   userId     Int
   rank       Int
   genre      String
-  artistData String    @db.Text
+  artistData String    @db.LongText
   timeRange  TimeRange
+  snapshotAt DateTime  @default(now())
 }
 
 enum TimeRange {
