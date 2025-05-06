@@ -41,7 +41,9 @@ export class PlaylistController {
   @UseGuards(AuthGuard('jwt'))
   @ApiBearerAuth()
   @addPlaylistDocs.operation
-  @addPlaylistDocs.body
+  @addPlaylistDocs.body1
+  @addPlaylistDocs.body2
+  @addPlaylistDocs.body3
   @addPlaylistDocs.response
   async addPlayList(
     @CurrentUserId() userId: number,
