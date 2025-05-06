@@ -37,13 +37,18 @@ export class PlaylistService {
     };
   }
 
-  // 플레이리스트 댓글 조회 == 플레이리스트 개별 조회
+  // 플레이리스트 개별 조회
   async getPlaylist(postId: number, userId: number) {
     try {
       // 조회수 증가
       await this.prisma.playlist.update({
         where: { id: postId },
         data: { viewCount: { increment: 1 } },
+      });
+
+      const playlistDetail = await this.prisma.playlist.findUnique({
+        where: { id: postId },
+        select: { explanation: true },
       });
 
       const result = await this.prisma.comment.findMany({
@@ -69,6 +74,7 @@ export class PlaylistService {
       const comment = result.map((res) => this.getCommentObj(res));
 
       return {
+        explanation: playlistDetail.explanation,
         comment,
         commentCount: comment.length,
         message: {
@@ -239,7 +245,6 @@ export class PlaylistService {
       userNickname: res.user.nickname,
       userProfileUrl: res.user.profile_url,
       content: res.content,
-      genres: res.PlaylistGenres.genre,
       createdAt: res.createdAt,
       likeCount: res._count.likes,
       isLiked: !!res.likes[0],
