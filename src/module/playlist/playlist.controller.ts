@@ -44,12 +44,14 @@ export class PlaylistController {
   @addPlaylistDocs.response
   async addPlayList(
     @CurrentUserId() userId: number,
-    @Body() body: { playlistUrl: string; explanation: string },
+    @Body()
+    body: { playlistUrl: string; explanation: string; genres: number[] },
   ) {
     return await this.playlistService.addPlaylist(
       userId,
       body.playlistUrl,
       body.explanation,
+      body.genres,
     );
   }
 

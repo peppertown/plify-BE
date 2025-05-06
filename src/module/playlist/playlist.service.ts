@@ -92,7 +92,12 @@ export class PlaylistService {
   }
 
   // 플레이리스트 추가
-  async addPlaylist(userId: number, playlistUrl: string, explanation: string) {
+  async addPlaylist(
+    userId: number,
+    playlistUrl: string,
+    explanation: string,
+    genres: number[],
+  ) {
     const playlistId = this.extractPlaylistId(playlistUrl);
 
     const newPlaylist = await this.prisma.playlist.create({
@@ -101,6 +106,15 @@ export class PlaylistService {
         playlistId,
         explanation,
       },
+    });
+
+    const genreData = genres.map((genre) => ({
+      playlistId: newPlaylist.id,
+      genreId: genre,
+    }));
+
+    await this.prisma.playlistGenres.createMany({
+      data: genreData,
     });
 
     return {
