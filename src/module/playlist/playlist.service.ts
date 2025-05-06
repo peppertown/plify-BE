@@ -92,13 +92,14 @@ export class PlaylistService {
   }
 
   // 플레이리스트 추가
-  async addPlaylist(userId: number, playlistUrl: string) {
+  async addPlaylist(userId: number, playlistUrl: string, explanation: string) {
     const playlistId = this.extractPlaylistId(playlistUrl);
 
     const newPlaylist = await this.prisma.playlist.create({
       data: {
         userId,
         playlistId,
+        explanation,
       },
     });
 

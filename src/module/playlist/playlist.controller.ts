@@ -44,9 +44,13 @@ export class PlaylistController {
   @addPlaylistDocs.response
   async addPlayList(
     @CurrentUserId() userId: number,
-    @Body() body: { playlistUrl: string },
+    @Body() body: { playlistUrl: string; explanation: string },
   ) {
-    return await this.playlistService.addPlaylist(userId, body.playlistUrl);
+    return await this.playlistService.addPlaylist(
+      userId,
+      body.playlistUrl,
+      body.explanation,
+    );
   }
 
   // 개별 플레이리스트 조회
