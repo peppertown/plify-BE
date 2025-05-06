@@ -30,6 +30,7 @@ model User {
   PlaylistLike   PlaylistLike[]
   UserTopArtist  UserTopArtist[]
   UserTopTrack   UserTopTrack[]
+  UserTopGenre   UserTopGenre[]
 }
 
 model Playlist {
@@ -122,6 +123,8 @@ model UserTopGenre {
   artistData String    @db.LongText
   timeRange  TimeRange
   snapshotAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id])
 }
 
 enum TimeRange {
