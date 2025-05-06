@@ -34,11 +34,12 @@ model User {
 }
 
 model Playlist {
-  id         Int      @id @default(autoincrement())
-  userId     Int
-  playlistId String   @unique // Spotify URL에서 추출한 실제 플레이리스트 ID
-  viewCount  Int      @default(0)
-  createdAt  DateTime @default(now())
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  playlistId  String   @unique // Spotify URL에서 추출한 실제 플레이리스트 ID
+  viewCount   Int      @default(0)
+  createdAt   DateTime @default(now())
+  explanation String?
 
   user         User           @relation(fields: [userId], references: [id])
   Comment      Comment[]
