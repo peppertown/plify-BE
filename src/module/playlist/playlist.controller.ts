@@ -56,6 +56,12 @@ export class PlaylistController {
     );
   }
 
+  // 장르 데이터 조회
+  @Get('genres')
+  async getGenres() {
+    return await this.playlistService.getAllGenres();
+  }
+
   // 장르별 플레이리스트 조회
   @Get('genre')
   @UseGuards(AuthGuard('jwt'))

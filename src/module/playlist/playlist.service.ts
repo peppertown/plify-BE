@@ -288,4 +288,24 @@ export class PlaylistService {
       isLiked: !!res.likes[0],
     };
   }
+
+  async getAllGenres() {
+    const genres = await this.prisma.genre.findMany({
+      select: {
+        id: true,
+        name: true,
+      },
+      orderBy: {
+        name: 'asc', // 가나다순 or 인기순 등 필요시 조정
+      },
+    });
+
+    return {
+      genres,
+      message: {
+        code: 200,
+        text: '전체 장르를 성공적으로 조회했습니다.',
+      },
+    };
+  }
 }
