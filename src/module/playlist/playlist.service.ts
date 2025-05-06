@@ -11,6 +11,7 @@ export class PlaylistService {
       orderBy: { id: 'desc' },
       include: {
         _count: { select: { PlaylistLike: true, Comment: true } },
+        PlaylistGenres: { select: { genre: { select: { name: true } } } },
 
         PlaylistLike: { where: { userId }, select: { id: true } },
         user: {
@@ -221,6 +222,7 @@ export class PlaylistService {
       playlistId: result.playlistId,
       likeCount: result._count.PlaylistLike,
       commentCount: result._count.Comment,
+      genre: result.PlaylistGenres.map((data) => data.genre.name),
       isLiked: !!result.PlaylistLike[0],
       viewCount: result.viewCount,
       createdAt: result.createdAt,
@@ -237,6 +239,7 @@ export class PlaylistService {
       userNickname: res.user.nickname,
       userProfileUrl: res.user.profile_url,
       content: res.content,
+      genres: res.PlaylistGenres.genre,
       createdAt: res.createdAt,
       likeCount: res._count.likes,
       isLiked: !!res.likes[0],
