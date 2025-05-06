@@ -19,6 +19,7 @@ import {
   deletePlaylistDocs,
   togglePlaylistLikeDocs,
   getGenresDocs,
+  getGenrePlaylistsDocs,
 } from './docs/playlist.docs';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
@@ -70,6 +71,10 @@ export class PlaylistController {
   // 장르별 플레이리스트 조회
   @Get('genre')
   @UseGuards(AuthGuard('jwt'))
+  @ApiBearerAuth()
+  @getGenrePlaylistsDocs.operation
+  @getGenrePlaylistsDocs.query
+  @getGenrePlaylistsDocs.response
   async getGenrePlaylists(
     @CurrentUserId() userId: number,
     @Query('genreId', ParseIntPipe) genreId: number,

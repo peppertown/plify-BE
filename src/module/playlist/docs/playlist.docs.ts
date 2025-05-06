@@ -1,4 +1,10 @@
-import { ApiBody, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiBody,
+  ApiOperation,
+  ApiParam,
+  ApiQuery,
+  ApiResponse,
+} from '@nestjs/swagger';
 
 export const getAllPlaylistsDocs = {
   operation: ApiOperation({
@@ -211,6 +217,47 @@ export const getGenresDocs = {
         message: {
           code: 200,
           text: '전체 장르를 성공적으로 조회했습니다.',
+        },
+      },
+    },
+  }),
+};
+
+export const getGenrePlaylistsDocs = {
+  operation: ApiOperation({
+    summary: '장르별 플레이리스트 조회 API',
+    description: '특정 장르에 속한 전체 플레이리스트를 조회합니다.',
+  }),
+  query: ApiQuery({
+    name: 'genreId',
+    required: true,
+    description: '장르의 ID',
+    type: Number,
+  }),
+  response: ApiResponse({
+    status: 200,
+    description: '장르별 플레이리스트 조회 성공',
+    schema: {
+      example: {
+        playlists: [
+          {
+            userId: '유저 아이디',
+            userName: '유저 이름',
+            userNickname: '유저 닉네임',
+            userProfileUrl: '유저 프로필 사진 url',
+            postId: '아이디',
+            playlistId: '플레이 리스트 아이디',
+            likeCount: '좋아요 수',
+            commentCount: '댓글 수',
+            genre: ['장르 아이디 1', '장르 아이디2'],
+            isLiked: '좋아요 여부',
+            viewCount: '조회수',
+            createdAt: '생성 일자',
+          },
+        ],
+        message: {
+          code: 200,
+          text: '장르별 플레이리스트를 정상적으로 조회했습니다.',
         },
       },
     },
