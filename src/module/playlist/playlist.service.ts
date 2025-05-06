@@ -98,6 +98,44 @@ export class PlaylistService {
     }
   }
 
+  async getGenrePlaylists(userId: number, genreId: number) {
+    const result = await this.prisma.playlist.findMany({
+      where: {
+        PlaylistGenres: {
+          some: {
+            genreId,
+          },
+        },
+      },
+      orderBy: { id: 'desc' },
+      include: {
+        _count: { select: { PlaylistLike: true, Comment: true } },
+        PlaylistGenres: { select: { genre: { select: { name: true } } } },
+
+        PlaylistLike: { where: { userId }, select: { id: true } },
+        user: {
+          select: {
+            id: true,
+            email: true,
+            name: true,
+            nickname: true,
+            profile_url: true,
+          },
+        },
+      },
+    });
+
+    const playlists = result.map((res) => this.getPlaylistObj(res));
+
+    return {
+      playlists,
+      message: {
+        code: 200,
+        text: '장르별 플레이리스트를 정상적으로 조회했습니다.',
+      },
+    };
+  }
+
   // 플레이리스트 추가
   async addPlaylist(
     userId: number,

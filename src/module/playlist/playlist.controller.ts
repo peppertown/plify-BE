@@ -6,6 +6,7 @@ import {
   Param,
   ParseIntPipe,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { PlaylistService } from './playlist.service';
@@ -53,6 +54,16 @@ export class PlaylistController {
       body.explanation,
       body.genres,
     );
+  }
+
+  // 장르별 플레이리스트 조회
+  @Get('genre')
+  @UseGuards(AuthGuard('jwt'))
+  async getGenrePlaylists(
+    @CurrentUserId() userId: number,
+    @Query('genreId', ParseIntPipe) genreId: number,
+  ) {
+    return await this.playlistService.getGenrePlaylists(userId, genreId);
   }
 
   // 개별 플레이리스트 조회
