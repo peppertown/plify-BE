@@ -18,6 +18,7 @@ import {
   getPlaylistDocs,
   deletePlaylistDocs,
   togglePlaylistLikeDocs,
+  getGenresDocs,
 } from './docs/playlist.docs';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
@@ -60,6 +61,8 @@ export class PlaylistController {
 
   // 장르 데이터 조회
   @Get('genres')
+  @getGenresDocs.operation
+  @getGenresDocs.response
   async getGenres() {
     return await this.playlistService.getAllGenres();
   }

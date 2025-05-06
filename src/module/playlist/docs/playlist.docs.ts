@@ -191,3 +191,28 @@ export const togglePlaylistLikeDocs = {
     },
   }),
 };
+
+export const getGenresDocs = {
+  operation: ApiOperation({
+    summary: '장르 데이터 전체 조회 API',
+    description: '플레이리스트 장르 데이터를 전체 조회합니다.',
+  }),
+
+  response: ApiResponse({
+    status: 200,
+    description: '장르 조회 성공',
+    schema: {
+      example: {
+        genres: [
+          { id: 1, name: '테스트 장르 1' },
+          { id: 2, name: '테스트 장르 2' },
+          { id: 3, name: '테스트 장르 3' },
+        ],
+        message: {
+          code: 200,
+          text: '전체 장르를 성공적으로 조회했습니다.',
+        },
+      },
+    },
+  }),
+};
