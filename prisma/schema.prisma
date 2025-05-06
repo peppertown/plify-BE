@@ -41,9 +41,10 @@ model Playlist {
   createdAt   DateTime @default(now())
   explanation String?
 
-  user         User           @relation(fields: [userId], references: [id])
-  Comment      Comment[]
-  PlaylistLike PlaylistLike[]
+  user           User             @relation(fields: [userId], references: [id])
+  Comment        Comment[]
+  PlaylistLike   PlaylistLike[]
+  PlaylistGenres PlaylistGenres[]
 }
 
 model Comment {
@@ -126,6 +127,23 @@ model UserTopGenre {
   snapshotAt DateTime  @default(now())
 
   user User @relation(fields: [userId], references: [id])
+}
+
+model Genre {
+  id             Int              @id @default(autoincrement())
+  name           String
+  PlaylistGenres PlaylistGenres[]
+}
+
+model PlaylistGenres {
+  id         Int @id @default(autoincrement())
+  playlistId Int
+  genreId    Int
+
+  playlist Playlist @relation(fields: [playlistId], references: [id])
+  genre    Genre    @relation(fields: [genreId], references: [id])
+
+  @@unique([playlistId, genreId])
 }
 
 enum TimeRange {
