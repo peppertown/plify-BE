@@ -306,4 +306,26 @@ export class AuthService {
     const ttlSeconds = 30 * 24 * 60 * 60; // 30일
     await this.redis.set(key, spotifyRefreshToken, ttlSeconds);
   }
+
+  async deleteUser(userId: number) {
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        email: 'deleteUser',
+        name: '탈퇴한 사용자',
+        nickname: '탈퇴한 사용자',
+        profile_url: process.env.INACTIVE_PROFILE_IMAGE,
+        followersCount: null,
+        deletedAt: new Date(),
+        isActive: false,
+      },
+    });
+
+    return {
+      message: {
+        code: 200,
+        text: '회원 탈퇴가 완료되었습니다.',
+      },
+    };
+  }
 }
