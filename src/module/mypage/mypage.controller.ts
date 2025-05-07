@@ -8,6 +8,8 @@ import {
 import { MypageService } from './mypage.service';
 import { AuthGuard } from '@nestjs/passport';
 import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
+import { getMyPlaylistDocs } from './docs/mypage.docs';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
 @Controller('mypage')
 export class MypageController {
@@ -15,6 +17,10 @@ export class MypageController {
 
   @Get('playlist')
   @UseGuards(AuthGuard('jwt'))
+  @ApiBearerAuth()
+  @getMyPlaylistDocs.operation
+  @getMyPlaylistDocs.query
+  @getMyPlaylistDocs.response
   async getMyPlaylist(
     @CurrentUserId() userId: number,
     @Query('mine', ParseBoolPipe) mine: boolean,
