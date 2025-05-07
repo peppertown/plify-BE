@@ -21,4 +21,10 @@ export class MypageController {
   ) {
     return await this.mypageService.getMyPlaylist(userId, mine);
   }
+
+  @Get('comment')
+  @UseGuards(AuthGuard('jwt'))
+  async getMyComment(@CurrentUserId() userId: number) {
+    return await this.mypageService.getMyComment(userId);
+  }
 }

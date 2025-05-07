@@ -43,4 +43,30 @@ export class MypageService {
       },
     };
   }
+
+  // 유저가 작성한 댓글 조회
+  async getMyComment(userId: number) {
+    const result = await this.prisma.comment.findMany({
+      where: { userId },
+      include: {
+        _count: {
+          select: { likes: true },
+        },
+      },
+      orderBy: { id: 'desc' },
+    });
+
+    const comment = result.map((res) => ({
+      id: res.id,
+      postId: res.postId,
+      content: res.content,
+      likeCount: res._count.likes,
+      createdAt: res.createdAt,
+    }));
+
+    return {
+      comment,
+      message: { code: 200, message: '작성한 댓글 조회에 성공했습니다.' },
+    };
+  }
 }
