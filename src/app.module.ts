@@ -7,6 +7,7 @@ import { RedisModule } from './redis/redis.module';
 import { PlaylistModule } from './module/playlist/playlist.module';
 import { CommentModule } from './module/comment/comment.module';
 import { RankModule } from './module/rank/rank.module';
+import { MypageModule } from './module/mypage/mypage.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { RankModule } from './module/rank/rank.module';
     PlaylistModule,
     CommentModule,
     RankModule,
+    MypageModule,
   ],
   controllers: [AppController],
   providers: [AppService],
