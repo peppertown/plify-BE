@@ -39,7 +39,7 @@ export class MypageService {
       playlist,
       message: {
         code: 200,
-        message: '유저가 만든 플레이리스트 조회에 성공했습니다.',
+        message: '마이페이지 플레이리스트 조회에 성공했습니다.',
       },
     };
   }
