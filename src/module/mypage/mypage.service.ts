@@ -39,7 +39,7 @@ export class MypageService {
       playlist,
       message: {
         code: 200,
-        message: '마이페이지 플레이리스트 조회에 성공했습니다.',
+        text: '마이페이지 플레이리스트 조회에 성공했습니다.',
       },
     };
   }
@@ -66,7 +66,7 @@ export class MypageService {
 
     return {
       comment,
-      message: { code: 200, message: '작성한 댓글 조회에 성공했습니다.' },
+      message: { code: 200, text: '작성한 댓글 조회에 성공했습니다.' },
     };
   }
 }

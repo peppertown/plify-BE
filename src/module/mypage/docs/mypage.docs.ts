@@ -39,7 +39,7 @@ export const getMyPlaylistDocs = {
         ],
         message: {
           code: 200,
-          message: '마이페이지 플레이리스트 조회에 성공했습니다.',
+          text: '마이페이지 플레이리스트 조회에 성공했습니다.',
         },
       },
     },
@@ -68,7 +68,7 @@ export const getMyCommentDocs = {
         ],
         message: {
           code: 200,
-          message: '작성한 댓글 조회에 성공했습니다.',
+          text: '작성한 댓글 조회에 성공했습니다.',
         },
       },
     },
