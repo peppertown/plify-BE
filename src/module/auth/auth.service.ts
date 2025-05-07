@@ -19,15 +19,22 @@ export class AuthService {
       const decoded = jwt.verify(token, process.env.JWT_SECRET!);
       return decoded;
     } catch (error) {
-      console.error('❌ 리프레시 토큰 검증 실패:', error.message);
+      console.error('리프레시 토큰 검증 실패:', error.message);
       throw new HttpException(
-        '유효하지 않은 토큰입니다.',
+        '유효하지 않은 리프레시 토큰입니다.',
         HttpStatus.UNAUTHORIZED,
       );
     }
   }
 
   private filterUserFields(user: any) {
+    if (!user) {
+      throw new HttpException(
+        '유저 정보가 올바르지 않습니다.',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
     return {
       userId: user.id,
       email: user.email,
@@ -50,7 +57,7 @@ export class AuthService {
       });
 
       const tokenResponse = await axios.post(
-        'https://accounts.spotify.com/api/token',
+        process.env.SPOTIFY_TOKEN_URL,
         params,
         {
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -61,7 +68,7 @@ export class AuthService {
 
       // 2. 스포티파이 유저 정보 조회
       const userInfoResponse = await axios.get(
-        'https://api.spotify.com/v1/me',
+        process.env.SPOTIFY_USER_INFO_URL,
         {
           headers: { Authorization: `Bearer ${access_token}` },
         },
@@ -69,7 +76,10 @@ export class AuthService {
       const userData = userInfoResponse.data;
 
       if (!userData.id) {
-        throw new Error('Spotify 사용자 ID를 가져올 수 없음');
+        throw new HttpException(
+          'Spotify 사용자 ID를 가져올 수 없습니다.',
+          HttpStatus.BAD_REQUEST,
+        );
       }
 
       // 3. 유저 데이터 매핑
@@ -148,9 +158,15 @@ export class AuthService {
           refreshToken: refresh_token,
         },
       };
-    } catch (error) {
-      console.error(error);
-      throw new HttpException('스포티파이 인증 실패', HttpStatus.BAD_REQUEST);
+    } catch (err) {
+      if (err instanceof HttpException) {
+        throw err;
+      }
+      console.error('스포티파이 Oauth 로그인 중 에러 발생', err);
+      throw new HttpException(
+        '스포티파이 Oauth 로그인에 실패했습니다.',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
@@ -162,10 +178,13 @@ export class AuthService {
 
       // 2. Redis에서 Spotify refreshToken 가져오기
       const spotifyRefreshToken = await this.redis.get(
-        `spotify_refresh_token:${userId}`,
+        `${process.env.REFRESH_KEY_SPOTIFY}:${userId}`,
       );
       if (!spotifyRefreshToken) {
-        throw new Error('Spotify refresh token을 찾을 수 없습니다');
+        throw new HttpException(
+          '스포티파이 리프레시 토큰을 찾을 수 없습니다',
+          HttpStatus.BAD_REQUEST,
+        );
       }
 
       // 3. Spotify access_token 리프레시
@@ -181,7 +200,7 @@ export class AuthService {
 
       // 6. 새로운 엑세스 토큰으로 유저 데이터 조회
       const userInfoResponse = await axios.get(
-        'https://api.spotify.com/v1/me',
+        process.env.SPOTIFY_USER_INFO_URL,
         {
           headers: { Authorization: `Bearer ${spotifyAccessToken}` },
         },
@@ -189,7 +208,10 @@ export class AuthService {
       const userData = userInfoResponse.data;
 
       if (!userData.id) {
-        throw new Error('Spotify 사용자 ID를 가져올 수 없음');
+        throw new HttpException(
+          '스포티파이 사용자 ID를 가져올 수 없습니다.',
+          HttpStatus.BAD_REQUEST,
+        );
       }
 
       // 7. 유저 데이터 매핑 후 DB 저장
@@ -236,9 +258,15 @@ export class AuthService {
           refreshToken: spotifyRefreshToken,
         },
       };
-    } catch (error) {
-      console.error(error);
-      throw new HttpException('토큰 재발급 실패', HttpStatus.UNAUTHORIZED);
+    } catch (err) {
+      if (err instanceof HttpException) {
+        throw err; // 네가 명시적으로 던진 예외라면 그대로 전달
+      }
+      console.error(err);
+      throw new HttpException(
+        '토큰 재발급 중 오류가 발생했습니다.',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
@@ -253,70 +281,120 @@ export class AuthService {
   }
 
   async refreshSpotifyAccessToken(refreshToken: string): Promise<string> {
-    const basicToken = Buffer.from(
-      `${process.env.SPOTIFY_CLIENT_ID}:${process.env.SPOTIFY_CLIENT_SECRET}`,
-    ).toString('base64');
+    try {
+      const basicToken = Buffer.from(
+        `${process.env.SPOTIFY_CLIENT_ID}:${process.env.SPOTIFY_CLIENT_SECRET}`,
+      ).toString('base64');
 
-    const params = new URLSearchParams({
-      grant_type: 'refresh_token',
-      refresh_token: refreshToken,
-    });
+      const params = new URLSearchParams({
+        grant_type: 'refresh_token',
+        refresh_token: refreshToken,
+      });
 
-    const response = await axios.post(
-      'https://accounts.spotify.com/api/token',
-      params,
-      {
+      const response = await axios.post(process.env.SPOTIFY_TOKEN_URL, params, {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
           Authorization: `Basic ${basicToken}`,
         },
-      },
-    );
+      });
 
-    const { access_token } = response.data;
-    if (!access_token) {
-      throw new Error('스포티파이 액세스 토큰 갱신 실패');
+      const { access_token } = response.data;
+      if (!access_token) {
+        throw new HttpException(
+          '스포티파이 액세스 토큰 갱신에 실패했습니다.',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      return access_token;
+    } catch (err) {
+      if (err instanceof HttpException) {
+        throw err;
+      }
+      console.error('스포티파이 액세스 토큰 갱신 오류 발생', err);
+      throw new HttpException(
+        '스포티파이 액세스 토큰 갱신 중 오류가 발생했습니다.',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
-
-    return access_token;
   }
 
   async generateAccessToken(userId: number): Promise<string> {
-    return this.jwt.signAsync(
-      { userId },
-      { expiresIn: '1h' }, // 액세스 토큰 1시간
-    );
+    try {
+      return await this.jwt.signAsync(
+        { userId },
+        { expiresIn: '1h' }, // 액세스 토큰 1시간
+      );
+    } catch (err) {
+      console.error('액세스 토큰 생성 실패:', err);
+      throw new HttpException(
+        '액세스 토큰 생성 중 오류가 발생했습니다.',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   async generateRefreshToken(userId: number): Promise<string> {
-    return this.jwt.signAsync(
-      { userId },
-      { expiresIn: '7d' }, // 리프레시 토큰 7일
-    );
+    try {
+      return this.jwt.signAsync(
+        { userId },
+        { expiresIn: '7d' }, // 리프레시 토큰 7일
+      );
+    } catch (err) {
+      console.error('리프레시 토큰 생성 실패:', err);
+      throw new HttpException(
+        '리프레시 토큰 생성 중 오류가 발생했습니다.',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   async saveServerRefreshToken(userId: number, refreshToken: string) {
-    const key = `server_refresh_token:${userId}`;
-    const ttlSeconds = 7 * 24 * 60 * 60; // 7일
-    await this.redis.set(key, refreshToken, ttlSeconds);
+    try {
+      const key = `${process.env.REFRESH_KEY_JWT}:${userId}`;
+      const ttlSeconds = 7 * 24 * 60 * 60; // 7일
+      await this.redis.set(key, refreshToken, ttlSeconds);
+    } catch (err) {
+      console.error('JWT 리프레시 토큰 레디스 저장 실패', err);
+      throw new HttpException(
+        'JWT 리프레시 토큰 레디스 저장 중 오류가 발생했습니다.',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   async saveSpotifyRefreshToken(userId: number, spotifyRefreshToken: string) {
-    const key = `spotify_refresh_token:${userId}`;
-    const ttlSeconds = 30 * 24 * 60 * 60; // 30일
-    await this.redis.set(key, spotifyRefreshToken, ttlSeconds);
+    try {
+      const key = `${process.env.REFRESH_KEY_SPOTIFY}:${userId}`;
+      const ttlSeconds = 30 * 24 * 60 * 60; // 30일
+      await this.redis.set(key, spotifyRefreshToken, ttlSeconds);
+    } catch (err) {
+      console.error('스포티파이 리프레시 토큰 레디스 저장 실패', err);
+      throw new HttpException(
+        '스포티파이 리프레시 토큰 레디스 저장 중 오류가 발생했습니다.',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   async deleteUser(userId: number) {
-    await this.prisma.user.delete({
-      where: { id: userId },
-    });
+    try {
+      await this.prisma.user.delete({
+        where: { id: userId },
+      });
 
-    return {
-      message: {
-        code: 200,
-        text: '회원 탈퇴가 완료되었습니다.',
-      },
-    };
+      return {
+        message: {
+          code: 200,
+          text: '회원 탈퇴가 완료되었습니다.',
+        },
+      };
+    } catch (err) {
+      console.error('회원 탈퇴 중 에러 발생', err);
+      throw new HttpException(
+        '회원 탈퇴 중 서버 오류가 발생했습니다',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 }
