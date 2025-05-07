@@ -24,6 +24,7 @@ model User {
   password       String?
   followersCount Int             @default(0)
   createdAt      DateTime        @default(now())
+  isActive       Boolean         @default(true)
   Playlist       Playlist[]
   Comment        Comment[]
   CommentLike    CommentLike[]
