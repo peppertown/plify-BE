@@ -16,14 +16,15 @@ datasource db {
 model User {
   id             Int             @id @default(autoincrement())
   spotifyId      String?         @unique
-  email          String          @unique
-  name           String
-  nickname       String          @unique
+  email          String?         @unique
+  name           String?
+  nickname       String?         @unique
   auth_provider  String
   profile_url    String?
   password       String?
-  followersCount Int             @default(0)
+  followersCount Int?            @default(0)
   createdAt      DateTime        @default(now())
+  deletedAt      DateTime?
   isActive       Boolean         @default(true)
   Playlist       Playlist[]
   Comment        Comment[]
