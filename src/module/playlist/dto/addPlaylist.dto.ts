@@ -1,7 +1,7 @@
 import { IsArray, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class AddPlaylistDto {
-  @IsNotEmpty()
+  @IsNotEmpty({ message: '플레이리스트 URL을 입력해주세요.' })
   @IsString()
   playlistUrl: string;
 
@@ -9,6 +9,6 @@ export class AddPlaylistDto {
   @IsString()
   explanation: string;
 
-  @IsArray()
+  @IsArray({ message: '장르 목록은 배열로 전달되어야합니다.' })
   genres: number[];
 }
