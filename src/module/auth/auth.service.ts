@@ -308,17 +308,8 @@ export class AuthService {
   }
 
   async deleteUser(userId: number) {
-    await this.prisma.user.update({
+    await this.prisma.user.delete({
       where: { id: userId },
-      data: {
-        email: 'deleteUser',
-        name: '탈퇴한 사용자',
-        nickname: '탈퇴한 사용자',
-        profile_url: process.env.INACTIVE_PROFILE_IMAGE,
-        followersCount: null,
-        deletedAt: new Date(),
-        isActive: false,
-      },
     });
 
     return {
