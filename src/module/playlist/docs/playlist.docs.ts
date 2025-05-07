@@ -48,40 +48,23 @@ export const addPlaylistDocs = {
     description: '사용자가 플레이리스트 URL을 업로드합니다.',
   }),
 
-  body1: ApiBody({
-    description: '추가할 플레이리스트 URL',
+  body: ApiBody({
+    description: '추가할 플레이리스트 데이터',
     schema: {
       type: 'object',
       properties: {
         playlistUrl: {
           type: 'string',
-          example: '추가할 플레이리스트 URL',
+          example: '플레이리스트 url',
         },
-      },
-    },
-  }),
-
-  body2: ApiBody({
-    description: '플레이리스트 설명',
-    schema: {
-      type: 'object',
-      properties: {
         explanation: {
           type: 'string',
           example: '플레이리스트 설명',
         },
-      },
-    },
-  }),
-
-  body3: ApiBody({
-    description: '장르 id 배열',
-    schema: {
-      type: 'object',
-      properties: {
         genres: {
-          type: 'number[]',
-          example: '장르 id 배열',
+          type: 'array',
+          items: { type: 'number' },
+          example: ['장르 아이디'],
         },
       },
     },
