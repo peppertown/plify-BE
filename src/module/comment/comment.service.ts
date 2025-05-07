@@ -25,11 +25,11 @@ export class CommentService {
           commentId: newComment.id,
         },
       };
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      console.error(err);
       throw new HttpException(
         '댓글 등록 중 오류가 발생했습니다.',
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -62,11 +62,15 @@ export class CommentService {
           text: '댓글이 삭제되었습니다.',
         },
       };
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      if (err instanceof HttpException) {
+        throw err;
+      }
+
+      console.error('댓글 삭제 중 에러 발생', err);
       throw new HttpException(
         '댓글 삭제 중 오류가 발생했습니다.',
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -118,7 +122,7 @@ export class CommentService {
       console.error(error);
       throw new HttpException(
         '댓글 좋아요 처리 중 오류가 발생했습니다.',
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
