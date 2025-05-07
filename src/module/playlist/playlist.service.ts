@@ -1,5 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { AddPlaylistDto } from './dto/addPlaylist.dto';
 
 @Injectable()
 export class PlaylistService {
@@ -7,34 +8,42 @@ export class PlaylistService {
 
   // 전체 플레이리스트 조회
   async getAllPlaylists(userId: number) {
-    const result = await this.prisma.playlist.findMany({
-      orderBy: { id: 'desc' },
-      include: {
-        _count: { select: { PlaylistLike: true, Comment: true } },
-        PlaylistGenres: { select: { genre: { select: { name: true } } } },
+    try {
+      const result = await this.prisma.playlist.findMany({
+        orderBy: { id: 'desc' },
+        include: {
+          _count: { select: { PlaylistLike: true, Comment: true } },
+          PlaylistGenres: { select: { genre: { select: { name: true } } } },
 
-        PlaylistLike: { where: { userId }, select: { id: true } },
-        user: {
-          select: {
-            id: true,
-            email: true,
-            name: true,
-            nickname: true,
-            profile_url: true,
+          PlaylistLike: { where: { userId }, select: { id: true } },
+          user: {
+            select: {
+              id: true,
+              email: true,
+              name: true,
+              nickname: true,
+              profile_url: true,
+            },
           },
         },
-      },
-    });
+      });
 
-    const playlists = result.map((res) => this.getPlaylistObj(res));
+      const playlists = result.map((res) => this.getPlaylistObj(res));
 
-    return {
-      playlists,
-      message: {
-        code: 200,
-        text: '전체 플레이리스트를 정상적으로 조회했습니다.',
-      },
-    };
+      return {
+        playlists,
+        message: {
+          code: 200,
+          text: '전체 플레이리스트를 정상적으로 조회했습니다.',
+        },
+      };
+    } catch (err) {
+      console.error('전체 플레이리스트 조회 중 에러 발생', err);
+      throw new HttpException(
+        '전체 플레이리스트 조회 중 서버 오류가 발생했습니다',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   // 플레이리스트 개별 조회
@@ -83,7 +92,6 @@ export class PlaylistService {
         },
       };
     } catch (err) {
-      console.error(err);
       if (err.code === 'P2025') {
         throw new HttpException(
           '플레이리스트를 찾을 수 없습니다.',
@@ -91,154 +99,191 @@ export class PlaylistService {
         );
       }
 
+      console.error('플레이리스트 개별 조회 중 에러 발생', err);
       throw new HttpException(
-        '서버에서 오류가 발생했습니다.',
+        '플레이리스트 개별 조회 중 오류가 발생했습니다.',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
 
   async getGenrePlaylists(userId: number, genreId: number) {
-    const result = await this.prisma.playlist.findMany({
-      where: {
-        PlaylistGenres: {
-          some: {
-            genreId,
+    try {
+      const result = await this.prisma.playlist.findMany({
+        where: {
+          PlaylistGenres: {
+            some: {
+              genreId,
+            },
           },
         },
-      },
-      orderBy: { id: 'desc' },
-      include: {
-        _count: { select: { PlaylistLike: true, Comment: true } },
-        PlaylistGenres: { select: { genre: { select: { name: true } } } },
+        orderBy: { id: 'desc' },
+        include: {
+          _count: { select: { PlaylistLike: true, Comment: true } },
+          PlaylistGenres: { select: { genre: { select: { name: true } } } },
 
-        PlaylistLike: { where: { userId }, select: { id: true } },
-        user: {
-          select: {
-            id: true,
-            email: true,
-            name: true,
-            nickname: true,
-            profile_url: true,
+          PlaylistLike: { where: { userId }, select: { id: true } },
+          user: {
+            select: {
+              id: true,
+              email: true,
+              name: true,
+              nickname: true,
+              profile_url: true,
+            },
           },
         },
-      },
-    });
+      });
 
-    const playlists = result.map((res) => this.getPlaylistObj(res));
+      const playlists = result.map((res) => this.getPlaylistObj(res));
 
-    return {
-      playlists,
-      message: {
-        code: 200,
-        text: '장르별 플레이리스트를 정상적으로 조회했습니다.',
-      },
-    };
+      return {
+        playlists,
+        message: {
+          code: 200,
+          text: '장르별 플레이리스트를 정상적으로 조회했습니다.',
+        },
+      };
+    } catch (err) {
+      console.error('장르별 플레이리스트 조회 중 에러 발생', err);
+      throw new HttpException(
+        '장르별 플레이리스트 조회 중 오류가 발생했습니다',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   // 플레이리스트 추가
-  async addPlaylist(
-    userId: number,
-    playlistUrl: string,
-    explanation: string,
-    genres: number[],
-  ) {
-    const playlistId = this.extractPlaylistId(playlistUrl);
+  async addPlaylist(userId: number, addPlaylistDto: AddPlaylistDto) {
+    try {
+      const { playlistUrl, explanation, genres } = addPlaylistDto;
 
-    const newPlaylist = await this.prisma.playlist.create({
-      data: {
-        userId,
-        playlistId,
-        explanation,
-      },
-    });
+      const playlistId = this.extractPlaylistId(playlistUrl);
 
-    const genreData = genres.map((genre) => ({
-      playlistId: newPlaylist.id,
-      genreId: genre,
-    }));
+      const newPlaylist = await this.prisma.playlist.create({
+        data: {
+          userId,
+          playlistId,
+          explanation,
+        },
+      });
 
-    await this.prisma.playlistGenres.createMany({
-      data: genreData,
-    });
+      const genreData = genres.map((genre) => ({
+        playlistId: newPlaylist.id,
+        genreId: genre,
+      }));
 
-    return {
-      message: {
-        code: 200,
-        text: '플레이리스트가 생성되었습니다.',
-      },
-      playlists: {
-        id: newPlaylist.id,
-      },
-    };
+      await this.prisma.playlistGenres.createMany({
+        data: genreData,
+      });
+
+      return {
+        message: {
+          code: 200,
+          text: '플레이리스트가 생성되었습니다.',
+        },
+        playlists: {
+          id: newPlaylist.id,
+        },
+      };
+    } catch (err) {
+      if (err instanceof HttpException) {
+        throw err;
+      }
+
+      console.error('플레이리스트 생성 중 에러 발생', err);
+      throw new HttpException(
+        '플레이리스트 생성 중 오류가 발생했습니다',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   // 플레이리스트 삭제
   async deletePlaylist(postId: number, userId: number) {
-    // 플레이리스트 존재 여부 및 작성자 확인
-    const playlist = await this.prisma.playlist.findUnique({
-      where: { id: postId },
-    });
+    try {
+      // 플레이리스트 존재 여부 및 작성자 확인
+      const playlist = await this.prisma.playlist.findUnique({
+        where: { id: postId },
+      });
 
-    if (!playlist) {
+      if (!playlist) {
+        throw new HttpException(
+          '플레이리스트를 찾을 수 없습니다.',
+          HttpStatus.NOT_FOUND,
+        );
+      }
+
+      if (playlist.userId !== userId) {
+        throw new HttpException(
+          '플레이리스트를 삭제할 권한이 없습니다.',
+          HttpStatus.FORBIDDEN,
+        );
+      }
+
+      await this.prisma.playlist.delete({
+        where: { id: postId },
+      });
+
+      return {
+        message: {
+          code: 200,
+          text: '플레이리스트가 삭제되었습니다.',
+        },
+      };
+    } catch (err) {
+      if (err instanceof HttpException) {
+        throw err;
+      }
+      console.error('플레이리스트 삭제 중 에러 발생', err);
       throw new HttpException(
-        '플레이리스트를 찾을 수 없습니다.',
-        HttpStatus.NOT_FOUND,
+        '플레이리스트 삭제 중 오류가 발생했습니다.',
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
-
-    if (playlist.userId !== userId) {
-      throw new HttpException(
-        '플레이리스트를 삭제할 권한이 없습니다.',
-        HttpStatus.FORBIDDEN,
-      );
-    }
-
-    await this.prisma.playlist.delete({
-      where: { id: postId },
-    });
-
-    return {
-      message: {
-        code: 200,
-        text: '플레이리스트가 삭제되었습니다.',
-      },
-    };
   }
 
   // 플레이리스트 좋아요 토글
   async togglePlaylistLike(userId: number, postId: number) {
-    const existing = await this.prisma.playlistLike.findUnique({
-      where: {
-        userId_postId: {
-          userId,
-          postId,
+    try {
+      const existing = await this.prisma.playlistLike.findUnique({
+        where: {
+          userId_postId: {
+            userId,
+            postId,
+          },
         },
-      },
-    });
-
-    if (existing) {
-      await this.prisma.playlistLike.delete({
-        where: { id: existing.id },
       });
 
-      return {
-        message: {
-          code: 200,
-          text: '플레이리스트 좋아요가 취소되었습니다.',
-        },
-      };
-    } else {
-      await this.prisma.playlistLike.create({
-        data: { userId, postId },
-      });
+      if (existing) {
+        await this.prisma.playlistLike.delete({
+          where: { id: existing.id },
+        });
 
-      return {
-        message: {
-          code: 200,
-          text: '플레이리스트 좋아요가 추가됐습니다.',
-        },
-      };
+        return {
+          message: {
+            code: 200,
+            text: '플레이리스트 좋아요가 취소되었습니다.',
+          },
+        };
+      } else {
+        await this.prisma.playlistLike.create({
+          data: { userId, postId },
+        });
+
+        return {
+          message: {
+            code: 200,
+            text: '플레이리스트 좋아요가 추가됐습니다.',
+          },
+        };
+      }
+    } catch (err) {
+      console.error('플레이리스트 좋아요 토글 중 에러 발생', err);
+      throw new HttpException(
+        '플레이리스트 좋아요 토글 중 오류가 발생했습니다',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
@@ -250,7 +295,7 @@ export class PlaylistService {
       return match[1];
     }
     throw new HttpException(
-      'Invalid Spotify playlist URL',
+      '유효하지 않은 플레이리스트 주소입니다.',
       HttpStatus.BAD_REQUEST,
     );
   }
@@ -290,22 +335,30 @@ export class PlaylistService {
   }
 
   async getAllGenres() {
-    const genres = await this.prisma.genre.findMany({
-      select: {
-        id: true,
-        name: true,
-      },
-      orderBy: {
-        name: 'asc', // 가나다순 or 인기순 등 필요시 조정
-      },
-    });
+    try {
+      const genres = await this.prisma.genre.findMany({
+        select: {
+          id: true,
+          name: true,
+        },
+        orderBy: {
+          name: 'asc', // 가나다순 or 인기순 등 필요시 조정
+        },
+      });
 
-    return {
-      genres,
-      message: {
-        code: 200,
-        text: '전체 장르를 성공적으로 조회했습니다.',
-      },
-    };
+      return {
+        genres,
+        message: {
+          code: 200,
+          text: '전체 장르를 성공적으로 조회했습니다.',
+        },
+      };
+    } catch (err) {
+      console.error('장르 데이터 조회 중 에러 발생', err);
+      throw new HttpException(
+        '장르 데이터 조회 중 오류가 발생했습니다',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 }
