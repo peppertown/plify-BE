@@ -24,8 +24,6 @@ model User {
   password       String?
   followersCount Int?            @default(0)
   createdAt      DateTime        @default(now())
-  deletedAt      DateTime?
-  isActive       Boolean         @default(true)
   Playlist       Playlist[]
   Comment        Comment[]
   CommentLike    CommentLike[]
@@ -43,7 +41,7 @@ model Playlist {
   createdAt   DateTime @default(now())
   explanation String?
 
-  user           User             @relation(fields: [userId], references: [id])
+  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   Comment        Comment[]
   PlaylistLike   PlaylistLike[]
   PlaylistGenres PlaylistGenres[]
@@ -57,7 +55,7 @@ model Comment {
   createdAt DateTime @default(now())
 
   post  Playlist      @relation(fields: [postId], references: [id], onDelete: Cascade)
-  user  User          @relation(fields: [userId], references: [id])
+  user  User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   likes CommentLike[]
 }
 
@@ -79,7 +77,7 @@ model PlaylistLike {
   postId    Int
   createdAt DateTime @default(now())
 
-  user User     @relation(fields: [userId], references: [id])
+  user User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   post Playlist @relation(fields: [postId], references: [id], onDelete: Cascade)
 
   @@unique([userId, postId], name: "userId_postId")
@@ -96,7 +94,7 @@ model UserTopArtist {
   snapshotAt  DateTime  @default(now())
   timeRange   TimeRange
 
-  user User @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, artistId, timeRange])
 }
@@ -114,7 +112,7 @@ model UserTopTrack {
   snapshotAt  DateTime  @default(now())
   timeRange   TimeRange
 
-  user User @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, trackId, snapshotAt, timeRange])
 }
@@ -128,7 +126,7 @@ model UserTopGenre {
   timeRange  TimeRange
   snapshotAt DateTime  @default(now())
 
-  user User @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Genre {
