@@ -22,6 +22,7 @@ import {
   getGenrePlaylistsDocs,
 } from './docs/playlist.docs';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { AddPlaylistDto } from './dto/addPlaylist.dto';
 
 @ApiTags('playlist')
 @Controller('playlist')
@@ -48,14 +49,9 @@ export class PlaylistController {
   async addPlayList(
     @CurrentUserId() userId: number,
     @Body()
-    body: { playlistUrl: string; explanation: string; genres: number[] },
+    body: AddPlaylistDto,
   ) {
-    return await this.playlistService.addPlaylist(
-      userId,
-      body.playlistUrl,
-      body.explanation,
-      body.genres,
-    );
+    return await this.playlistService.addPlaylist(userId, body);
   }
 
   // 장르 데이터 조회
