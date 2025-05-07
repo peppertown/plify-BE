@@ -8,9 +8,10 @@ import {
 import { MypageService } from './mypage.service';
 import { AuthGuard } from '@nestjs/passport';
 import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
-import { getMyPlaylistDocs } from './docs/mypage.docs';
-import { ApiBearerAuth } from '@nestjs/swagger';
+import { getMyCommentDocs, getMyPlaylistDocs } from './docs/mypage.docs';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('mypage')
 @Controller('mypage')
 export class MypageController {
   constructor(private readonly mypageService: MypageService) {}
@@ -30,6 +31,9 @@ export class MypageController {
 
   @Get('comment')
   @UseGuards(AuthGuard('jwt'))
+  @ApiBearerAuth()
+  @getMyCommentDocs.operation
+  @getMyCommentDocs.response
   async getMyComment(@CurrentUserId() userId: number) {
     return await this.mypageService.getMyComment(userId);
   }

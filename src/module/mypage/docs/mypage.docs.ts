@@ -45,3 +45,32 @@ export const getMyPlaylistDocs = {
     },
   }),
 };
+
+export const getMyCommentDocs = {
+  operation: ApiOperation({
+    summary: '작성한 댓글 조회 API',
+    description: '내가 작성한 모든 댓글을 최신순으로 조회합니다.',
+  }),
+
+  response: ApiResponse({
+    status: 200,
+    description: '작성한 댓글 조회 성공',
+    schema: {
+      example: {
+        comment: [
+          {
+            id: '댓글 아이디 | number',
+            postId: '포스트(플레이리스트) id | number',
+            content: '댓글내용 | content',
+            likeCount: '좋아요 수 | number',
+            createdAt: '댓글 작성일자',
+          },
+        ],
+        message: {
+          code: 200,
+          message: '작성한 댓글 조회에 성공했습니다.',
+        },
+      },
+    },
+  }),
+};
