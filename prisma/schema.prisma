@@ -93,6 +93,7 @@ model UserTopArtist {
   externalUrl String
   snapshotAt  DateTime  @default(now())
   timeRange   TimeRange
+  diff        Int?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -111,6 +112,7 @@ model UserTopTrack {
   externalUrl String
   snapshotAt  DateTime  @default(now())
   timeRange   TimeRange
+  diff        Int?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -125,6 +127,7 @@ model UserTopGenre {
   artistData String    @db.LongText
   timeRange  TimeRange
   snapshotAt DateTime  @default(now())
+  diff       Int?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
