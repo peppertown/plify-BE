@@ -14,22 +14,23 @@ datasource db {
 }
 
 model User {
-  id            Int             @id @default(autoincrement())
-  spotifyId     String?         @unique
-  email         String?         @unique
-  name          String?
-  nickname      String?         @unique
-  auth_provider String
-  profile_url   String?
-  password      String?
-  createdAt     DateTime        @default(now())
-  Playlist      Playlist[]
-  Comment       Comment[]
-  CommentLike   CommentLike[]
-  PlaylistLike  PlaylistLike[]
-  UserTopArtist UserTopArtist[]
-  UserTopTrack  UserTopTrack[]
-  UserTopGenre  UserTopGenre[]
+  id             Int             @id @default(autoincrement())
+  spotifyId      String?         @unique
+  email          String?         @unique
+  name           String?
+  nickname       String?         @unique
+  auth_provider  String
+  profile_url    String?
+  password       String?
+  followersCount Int?            @default(0)
+  createdAt      DateTime        @default(now())
+  Playlist       Playlist[]
+  Comment        Comment[]
+  CommentLike    CommentLike[]
+  PlaylistLike   PlaylistLike[]
+  UserTopArtist  UserTopArtist[]
+  UserTopTrack   UserTopTrack[]
+  UserTopGenre   UserTopGenre[]
 
   following UserFollow[] @relation("Following")
   followers UserFollow[] @relation("Followers")
