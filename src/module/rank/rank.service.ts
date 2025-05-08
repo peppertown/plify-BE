@@ -148,13 +148,13 @@ export class RankService {
 
         const currentRank = data;
 
-        await this.saveUserTopArtist(currentRank, userId, timeRange);
-        await this.saveUserTopGenres(range, genres, userId);
-
         const rank = currentRank.map((data) => ({
           ...data,
           diff: 0, // 첫 랭킹 확인이라 순위 변동 X
         }));
+
+        await this.saveUserTopArtist(rank, userId, timeRange);
+        await this.saveUserTopGenres(range, genres, userId);
 
         return {
           message: {
@@ -187,9 +187,6 @@ export class RankService {
           where: { userId, timeRange },
         });
 
-        await this.saveUserTopArtist(currentRank, userId, timeRange);
-        await this.saveUserTopGenres(range, genres, userId);
-
         // 랭킹 변동값 측정
         const rank = currentRank.map((curr) => {
           const prev = previousRank.find((p) => p.artistId === curr.artistId);
@@ -197,10 +194,17 @@ export class RankService {
           const diff = prev ? prev.rank - curr.rank : null;
 
           return {
-            ...curr,
+            rank: curr.rank,
+            artistId: curr.artistId,
+            name: curr.name,
+            imageUrl: curr.imageUrl,
+            externalUrl: curr.externalUrl,
             diff, // 숫자 or null(랭킹 신규 진입)
           };
         });
+
+        await this.saveUserTopArtist(rank, userId, timeRange);
+        await this.saveUserTopGenres(range, genres, userId);
 
         return {
           message: {
@@ -211,9 +215,14 @@ export class RankService {
         };
       }
 
-      const rank = previousRank.map((data) => ({
-        ...data,
-        diff: 0,
+      const rank = previousRank.map((curr) => ({
+        rank: curr.rank,
+        artistId: curr.artistId,
+        name: curr.name,
+        imageUrl: curr.imageUrl,
+
+        externalUrl: curr.externalUrl,
+        diff: curr.diff,
       }));
 
       return {
