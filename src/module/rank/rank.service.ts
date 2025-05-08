@@ -30,12 +30,12 @@ export class RankService {
           spotifyAccessToken,
           timeRange,
         );
-        await this.saveUserTopTrack(currentRank, userId, timeRange);
-
         const rank = currentRank.map((data) => ({
           ...data,
           diff: 0, // 첫 랭킹 확인이라 순위 변동 X
         }));
+
+        await this.saveUserTopTrack(currentRank, userId, timeRange);
 
         return {
           message: {
@@ -60,19 +60,25 @@ export class RankService {
         await this.prisma.userTopTrack.deleteMany({
           where: { userId, timeRange },
         });
-        await this.saveUserTopTrack(currentRank, userId, timeRange);
 
         // 랭킹 변동값 측정
         const rank = currentRank.map((curr) => {
           const prev = previousRank.find((p) => p.trackId === curr.trackId);
-
           const diff = prev ? prev.rank - curr.rank : null;
 
           return {
-            ...curr,
-            diff, // 숫자 or null(랭킹 신규 진입)
+            rank: curr.rank,
+            trackId: curr.trackId,
+            name: curr.name,
+            imageUrl: curr.imageUrl,
+            artistId: curr.artistId,
+            artistName: curr.artistName,
+            externalUrl: curr.externalUrl,
+            diff,
           };
         });
+
+        await this.saveUserTopTrack(rank, userId, timeRange);
 
         return {
           message: {
@@ -83,10 +89,18 @@ export class RankService {
         };
       }
 
-      const rank = previousRank.map((data) => ({
-        ...data,
-        diff: 0,
-      }));
+      const rank = previousRank.map((curr) => {
+        return {
+          rank: curr.rank,
+          trackId: curr.trackId,
+          name: curr.name,
+          imageUrl: curr.imageUrl,
+          artistId: curr.artistId,
+          artistName: curr.artistName,
+          externalUrl: curr.externalUrl,
+          diff: curr.diff,
+        };
+      });
 
       return {
         message: {
