@@ -8,6 +8,7 @@ import { PlaylistModule } from './module/playlist/playlist.module';
 import { CommentModule } from './module/comment/comment.module';
 import { RankModule } from './module/rank/rank.module';
 import { MypageModule } from './module/mypage/mypage.module';
+import { HomeModule } from './module/home/home.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { MypageModule } from './module/mypage/mypage.module';
     CommentModule,
     RankModule,
     MypageModule,
+    HomeModule,
   ],
   controllers: [AppController],
   providers: [AppService],
