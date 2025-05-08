@@ -9,6 +9,7 @@ import { CommentModule } from './module/comment/comment.module';
 import { RankModule } from './module/rank/rank.module';
 import { MypageModule } from './module/mypage/mypage.module';
 import { HomeModule } from './module/home/home.module';
+import { FollowModule } from './module/follow/follow.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { HomeModule } from './module/home/home.module';
     RankModule,
     MypageModule,
     HomeModule,
+    FollowModule,
   ],
   controllers: [AppController],
   providers: [AppService],
