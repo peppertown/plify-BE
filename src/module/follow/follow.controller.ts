@@ -1,5 +1,6 @@
 import {
   Controller,
+  Get,
   Param,
   ParseIntPipe,
   Post,
@@ -20,5 +21,11 @@ export class FollowController {
     @Param('targetUserId', ParseIntPipe) targetUserId: number,
   ) {
     return await this.followService.handleUserFollow(userId, targetUserId);
+  }
+
+  @Get('follower')
+  @UseGuards(AuthGuard('jwt'))
+  async getFollowers(@CurrentUserId() userId: number) {
+    return await this.followService.getFollowers(userId);
   }
 }

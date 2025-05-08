@@ -37,4 +37,19 @@ export class FollowService {
       );
     }
   }
+
+  async getFollowers(userId: number) {
+    const result = await this.prisma.userFollow.findMany({
+      where: { followeeId: userId },
+      select: { follower: true },
+      orderBy: { id: 'desc' },
+    });
+    const follower = result.map((res) => this.formatUserList(res.follower));
+
+    return { follower };
+  }
+
+  formatUserList(result: any) {
+    return { id: result.id, name: result.name, profileUrl: result.profile_url };
+  }
 }
