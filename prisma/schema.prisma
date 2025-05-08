@@ -14,23 +14,25 @@ datasource db {
 }
 
 model User {
-  id             Int             @id @default(autoincrement())
-  spotifyId      String?         @unique
-  email          String?         @unique
-  name           String?
-  nickname       String?         @unique
-  auth_provider  String
-  profile_url    String?
-  password       String?
-  followersCount Int?            @default(0)
-  createdAt      DateTime        @default(now())
-  Playlist       Playlist[]
-  Comment        Comment[]
-  CommentLike    CommentLike[]
-  PlaylistLike   PlaylistLike[]
-  UserTopArtist  UserTopArtist[]
-  UserTopTrack   UserTopTrack[]
-  UserTopGenre   UserTopGenre[]
+  id            Int             @id @default(autoincrement())
+  spotifyId     String?         @unique
+  email         String?         @unique
+  name          String?
+  nickname      String?         @unique
+  auth_provider String
+  profile_url   String?
+  password      String?
+  createdAt     DateTime        @default(now())
+  Playlist      Playlist[]
+  Comment       Comment[]
+  CommentLike   CommentLike[]
+  PlaylistLike  PlaylistLike[]
+  UserTopArtist UserTopArtist[]
+  UserTopTrack  UserTopTrack[]
+  UserTopGenre  UserTopGenre[]
+
+  following UserFollow[] @relation("Following")
+  followers UserFollow[] @relation("Followers")
 }
 
 model Playlist {
@@ -147,6 +149,18 @@ model PlaylistGenres {
   genre    Genre    @relation(fields: [genreId], references: [id])
 
   @@unique([playlistId, genreId])
+}
+
+model UserFollow {
+  id         Int      @id @default(autoincrement())
+  followerId Int
+  followeeId Int
+  createdAt  DateTime @default(now())
+
+  follower User @relation("Followers", fields: [followerId], references: [id])
+  followee User @relation("Following", fields: [followeeId], references: [id])
+
+  @@unique([followerId, followeeId], name: "unique_following")
 }
 
 enum TimeRange {
