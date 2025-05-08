@@ -39,14 +39,53 @@ export class FollowService {
   }
 
   async getFollowers(userId: number) {
-    const result = await this.prisma.userFollow.findMany({
-      where: { followeeId: userId },
-      select: { follower: true },
-      orderBy: { id: 'desc' },
-    });
-    const follower = result.map((res) => this.formatUserList(res.follower));
+    try {
+      const result = await this.prisma.userFollow.findMany({
+        where: { followeeId: userId },
+        select: { follower: true },
+        orderBy: { id: 'desc' },
+      });
+      const follower = result.map((res) => this.formatUserList(res.follower));
 
-    return { follower };
+      return {
+        message: {
+          code: 200,
+          text: '팔로워 목록 조회에 성공했습니다',
+        },
+        follower,
+      };
+    } catch (err) {
+      console.error('팔로워 목록 조회 중 에러 발생', err);
+      throw new HttpException(
+        '팔로워 목록 조회 중 오류가 발생했습니다',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async getFollowings(userId: number) {
+    try {
+      const result = await this.prisma.userFollow.findMany({
+        where: { followerId: userId },
+        select: { followee: true },
+        orderBy: { id: 'desc' },
+      });
+      const following = result.map((res) => this.formatUserList(res.followee));
+
+      return {
+        message: {
+          code: 200,
+          text: '팔로잉 목록 조회에 성공했습니다',
+        },
+        following,
+      };
+    } catch (err) {
+      console.error('팔로잉 목록 조회 중 에러 발생', err);
+      throw new HttpException(
+        '팔로잉 목록 조회 중 오류가 발생했습니다',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   formatUserList(result: any) {

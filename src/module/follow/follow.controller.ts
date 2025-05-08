@@ -28,4 +28,10 @@ export class FollowController {
   async getFollowers(@CurrentUserId() userId: number) {
     return await this.followService.getFollowers(userId);
   }
+
+  @Get('following')
+  @UseGuards(AuthGuard('jwt'))
+  async getFollowings(@CurrentUserId() userId: number) {
+    return await this.followService.getFollowings(userId);
+  }
 }
