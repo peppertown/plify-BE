@@ -1,7 +1,9 @@
 import {
   Controller,
   Get,
+  Param,
   ParseBoolPipe,
+  ParseIntPipe,
   Query,
   UseGuards,
 } from '@nestjs/common';
@@ -36,5 +38,14 @@ export class MypageController {
   @getMyCommentDocs.response
   async getMyComment(@CurrentUserId() userId: number) {
     return await this.mypageService.getMyComment(userId);
+  }
+
+  @Get('user/:targetUserId')
+  @UseGuards(AuthGuard('jwt'))
+  async getUserMyPage(
+    @CurrentUserId() userId: number,
+    @Param('targetUserId', ParseIntPipe) targetUserId: number,
+  ) {
+    return await this.mypageService.getUserMyPage(userId, targetUserId);
   }
 }
