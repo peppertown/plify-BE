@@ -103,9 +103,11 @@ export class MypageService {
       };
       const playlistData = (await this.getMyPlaylist(targetUserId, true))
         .playlist;
-      const followerCount = (
-        await this.followService.getFollowers(targetUserId)
-      ).follower.length;
+      const followerData = await this.followService.getFollowers(targetUserId);
+      const followerCount = followerData.follower.length;
+      const isFollowed = !!followerData.follower.filter(
+        (res) => userId == res.id,
+      ).length;
       const followingCount = (
         await this.followService.getFollowings(targetUserId)
       ).following.length;
@@ -119,6 +121,7 @@ export class MypageService {
         playlistData,
         followerCount,
         followingCount,
+        isFollowed,
         playlistCount: playlistData.length,
       };
     } catch (err) {
