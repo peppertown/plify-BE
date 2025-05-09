@@ -26,6 +26,8 @@ export class HomeService {
           },
         },
 
+        take: 5,
+
         include: {
           _count: { select: { PlaylistLike: true, Comment: true } },
           PlaylistGenres: { select: { genre: { select: { name: true } } } },
@@ -47,7 +49,13 @@ export class HomeService {
         this.playlistService.getPlaylistObj(res),
       );
 
-      return { playlist };
+      return {
+        message: {
+          code: 200,
+          text: '이번주 플레이리스트 조회에 성공했습니다',
+        },
+        playlist,
+      };
     } catch (err) {
       console.error('이번주 플레이리스트 조회 중 에러 발생', err);
       throw new HttpException(
