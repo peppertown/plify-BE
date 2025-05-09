@@ -64,4 +64,55 @@ export class HomeService {
       );
     }
   }
+
+  // 팔로우한 유저들의 최신 플레이리스트 조회
+  async getFollowingPlaylist(userId: number) {
+    try {
+      const result = await this.prisma.userFollow.findMany({
+        where: { followeeId: userId },
+        select: { followerId: true },
+      });
+
+      const followingIds = result.map((res) => res.followerId);
+
+      const playlistData = await this.prisma.playlist.findMany({
+        where: { userId: { in: followingIds } },
+        orderBy: { id: 'desc' },
+        take: 10,
+        include: {
+          _count: { select: { PlaylistLike: true, Comment: true } },
+          PlaylistGenres: { select: { genre: { select: { name: true } } } },
+
+          PlaylistLike: { where: { userId }, select: { id: true } },
+          user: {
+            select: {
+              id: true,
+              email: true,
+              name: true,
+              nickname: true,
+              profile_url: true,
+            },
+          },
+        },
+      });
+
+      const playlist = playlistData.map((res) =>
+        this.playlistService.getPlaylistObj(res),
+      );
+
+      return {
+        message: {
+          code: 200,
+          text: '팔로우한 유저들의 플레이리스트 조회가 완료되었습니다.',
+        },
+        playlist,
+      };
+    } catch (err) {
+      console.error('팔로잉 플레이리스트 조회 중 에러 발생', err);
+      throw new HttpException(
+        '팔로우한 유저들의 플레이리스트 조회 중 오류가 발생했습니다',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
 }

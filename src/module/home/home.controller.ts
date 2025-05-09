@@ -2,7 +2,10 @@ import { Controller, Get, UseGuards } from '@nestjs/common';
 import { HomeService } from './home.service';
 import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
 import { AuthGuard } from '@nestjs/passport';
-import { getWeeklyPlaylistDocs } from './docs/home.docs';
+import {
+  getFollowingPlaylistDocs,
+  getWeeklyPlaylistDocs,
+} from './docs/home.docs';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('home')
@@ -18,5 +21,14 @@ export class HomeController {
   @getWeeklyPlaylistDocs.response
   async getWeeklyPlaylist(@CurrentUserId() userId: number) {
     return await this.homeService.getWeeklyPlaylist(userId);
+  }
+
+  @Get('playlist/following')
+  @UseGuards(AuthGuard('jwt'))
+  @ApiBearerAuth()
+  @getFollowingPlaylistDocs.operation
+  @getFollowingPlaylistDocs.response
+  async getFollowingPlaylist(@CurrentUserId() userId: number) {
+    return await this.homeService.getFollowingPlaylist(userId);
   }
 }
