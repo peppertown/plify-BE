@@ -100,6 +100,7 @@ model UserTopArtist {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, artistId, timeRange])
+  @@index([timeRange, snapshotAt])
 }
 
 model UserTopTrack {
@@ -119,6 +120,7 @@ model UserTopTrack {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, trackId, snapshotAt, timeRange])
+  @@index([timeRange, snapshotAt])
 }
 
 model UserTopGenre {
@@ -132,6 +134,8 @@ model UserTopGenre {
   diff       Int?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([timeRange, snapshotAt])
 }
 
 model Genre {
