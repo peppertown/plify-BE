@@ -1,4 +1,4 @@
-import { ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import { ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
 
 export const getMyPlaylistDocs = {
   operation: ApiOperation({
@@ -70,6 +70,57 @@ export const getMyCommentDocs = {
           code: 200,
           text: '작성한 댓글 조회에 성공했습니다.',
         },
+      },
+    },
+  }),
+};
+
+export const getUserMyPageDocs = {
+  operation: ApiOperation({
+    summary: '다른 유저 마이페이지 조회 API',
+    description: '타 유저의 기본 정보 및 작성한 플레이리스트를 조회합니다.',
+  }),
+
+  param: ApiParam({
+    name: 'targetUserId',
+    required: true,
+    description: '조회할 유저의 ID | number',
+    example: 1,
+  }),
+
+  response: ApiResponse({
+    status: 200,
+    description: '다른 유저 마이페이지 정보 반환',
+    schema: {
+      example: {
+        message: {
+          code: 200,
+          text: '다른 유저 마이페이지 조회에 성공했습니다',
+        },
+        user: {
+          id: '유저 아이디 | number',
+          name: '유저 이름 | string',
+          profileUrl: '유저 프로필 url | string',
+        },
+        playlistData: [
+          {
+            userId: '유저 아이디',
+            userName: '유저 이름',
+            userNickname: '유저 닉네임',
+            userProfileUrl: '유저 프로필 사진 url',
+            postId: '아이디',
+            playlistId: '플레이 리스트 아이디',
+            likeCount: '좋아요 수',
+            commentCount: '댓글 수',
+            genre: ['장르1', '장르2'],
+            isLiked: '좋아요 여부',
+            viewCount: '조회수',
+            createdAt: '생성 일자',
+          },
+        ],
+        followerCount: '팔로워 수 | number',
+        followingCount: '팔로잉 수 | number',
+        playlistCount: '게시글 수 | number',
       },
     },
   }),

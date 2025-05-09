@@ -10,7 +10,11 @@ import {
 import { MypageService } from './mypage.service';
 import { AuthGuard } from '@nestjs/passport';
 import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
-import { getMyCommentDocs, getMyPlaylistDocs } from './docs/mypage.docs';
+import {
+  getMyCommentDocs,
+  getMyPlaylistDocs,
+  getUserMyPageDocs,
+} from './docs/mypage.docs';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('mypage')
@@ -42,6 +46,10 @@ export class MypageController {
 
   @Get('user/:targetUserId')
   @UseGuards(AuthGuard('jwt'))
+  @ApiBearerAuth()
+  @getUserMyPageDocs.operation
+  @getUserMyPageDocs.param
+  @getUserMyPageDocs.response
   async getUserMyPage(
     @CurrentUserId() userId: number,
     @Param('targetUserId', ParseIntPipe) targetUserId: number,
