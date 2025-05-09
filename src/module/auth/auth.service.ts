@@ -88,7 +88,6 @@ export class AuthService {
         email: userData.email || `${userData.id}@spotify.com`,
         displayName: userData.display_name || userData.id,
         profileImageUrl: userData.images?.[0]?.url || null,
-        followersCount: userData.followers?.total || 0,
       };
 
       // 4. 기존 유저 조회 또는 업데이트
@@ -103,7 +102,6 @@ export class AuthService {
             email: spotifyUser.email,
             name: spotifyUser.displayName,
             profile_url: spotifyUser.profileImageUrl,
-            followersCount: spotifyUser.followersCount,
           },
         });
       } else {
@@ -126,11 +124,19 @@ export class AuthService {
             name: spotifyUser.displayName,
             nickname: finalNickname,
             profile_url: spotifyUser.profileImageUrl,
-            followersCount: spotifyUser.followersCount,
             auth_provider: 'spotify',
           },
         });
       }
+
+      const [followersCount, followingsCount] = await Promise.all([
+        this.prisma.userFollow.count({
+          where: { followeeId: user.id },
+        }),
+        this.prisma.userFollow.count({
+          where: { followerId: user.id },
+        }),
+      ]);
 
       // 5. 유저 응답 데이터 정리
       const responseUser = this.filterUserFields(user);
@@ -148,7 +154,7 @@ export class AuthService {
           code: 200,
           message: '스포티파이 로그인 성공',
         },
-        user: responseUser,
+        user: { ...responseUser, followersCount, followingsCount },
         jwt: {
           accessToken,
           refreshToken,
@@ -220,7 +226,6 @@ export class AuthService {
         email: userData.email || `${userData.id}@spotify.com`,
         displayName: userData.display_name || userData.id,
         profileImageUrl: userData.images?.[0]?.url || null,
-        followersCount: userData.followers?.total || 0,
       };
 
       await this.prisma.user.update({
@@ -229,7 +234,6 @@ export class AuthService {
           email: spotifyUser.email,
           name: spotifyUser.displayName,
           profile_url: spotifyUser.profileImageUrl,
-          followersCount: spotifyUser.followersCount,
         },
       });
 

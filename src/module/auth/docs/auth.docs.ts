@@ -70,6 +70,8 @@ export const spotifyLoginDocs = {
               example: 'spotify',
               description: '인증 제공자',
             },
+            followersCount: { type: 'number', description: '유저 팔로워 수' },
+            followingsCount: { type: 'number', description: '유저 팔로잉 수' },
           },
         },
         jwt: {
