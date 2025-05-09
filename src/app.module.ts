@@ -10,6 +10,7 @@ import { RankModule } from './module/rank/rank.module';
 import { MypageModule } from './module/mypage/mypage.module';
 import { HomeModule } from './module/home/home.module';
 import { FollowModule } from './module/follow/follow.module';
+import { CronModule } from './module/cron/cron.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { FollowModule } from './module/follow/follow.module';
     MypageModule,
     HomeModule,
     FollowModule,
+    CronModule,
   ],
   controllers: [AppController],
   providers: [AppService],
