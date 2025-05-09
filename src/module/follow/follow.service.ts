@@ -45,7 +45,19 @@ export class FollowService {
         select: { follower: true },
         orderBy: { id: 'desc' },
       });
-      const follower = result.map((res) => this.formatUserList(res.follower));
+      let follower = result.map((res) => this.formatUserList(res.follower));
+
+      const myFollowings = await this.prisma.userFollow.findMany({
+        where: { followerId: userId },
+        select: { followeeId: true },
+      });
+
+      const followingIds = new Set(myFollowings.map((f) => f.followeeId));
+
+      follower = follower.map((res) => ({
+        ...res,
+        isFollowed: followingIds.has(res.id),
+      }));
 
       return {
         message: {
@@ -70,8 +82,24 @@ export class FollowService {
         select: { followee: true },
         orderBy: { id: 'desc' },
       });
-      const following = result.map((res) => this.formatUserList(res.followee));
 
+      const following = await Promise.all(
+        result.map(async (res) => {
+          const isFollowed = await this.prisma.userFollow.findFirst({
+            where: {
+              followerId: res.followee.id,
+              followeeId: userId,
+            },
+          });
+
+          return {
+            id: res.followee.id,
+            name: res.followee.name,
+            profileUrl: res.followee.profile_url,
+            isFollowed: !!isFollowed,
+          };
+        }),
+      );
       return {
         message: {
           code: 200,
