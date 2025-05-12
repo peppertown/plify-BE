@@ -57,6 +57,7 @@ export class FollowController {
 
   @Get('count')
   @UseGuards(AuthGuard('jwt'))
+  @ApiBearerAuth()
   @getFollowCountsDocs.operation
   @getFollowCountsDocs.response
   async getUsersFollowCount(@CurrentUserId() userId: number) {
@@ -65,6 +66,7 @@ export class FollowController {
 
   @Delete(':targetUserId')
   @UseGuards(AuthGuard('jwt'))
+  @ApiBearerAuth()
   @deleteFollowerDocs.operation
   @deleteFollowerDocs.param
   @deleteFollowerDocs.response
