@@ -392,6 +392,7 @@ export class PlaylistService {
         imageUrl: playlistData.images[0].url,
         name: playlistData.name,
         userName: playlistData.owner.display_name,
+        externalUrl: playlistData.external_urls.spotify,
       };
 
       return playlist;
