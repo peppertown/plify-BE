@@ -37,17 +37,33 @@ model User {
 }
 
 model Playlist {
-  id          Int      @id @default(autoincrement())
-  userId      Int
-  playlistId  String   @unique // Spotify URL에서 추출한 실제 플레이리스트 ID
-  viewCount   Int      @default(0)
-  createdAt   DateTime @default(now())
-  explanation String?
+  id            Int      @id @default(autoincrement())
+  userId        Int
+  playlistId    String   @unique // Spotify URL에서 추출한 실제 플레이리스트 ID
+  name          String?
+  userName      String?
+  imageUrl      String?
+  externalUrl   String?
+  viewCount     Int      @default(0)
+  createdAt     DateTime @default(now())
+  lastFetchedAt DateTime @default(now())
+  explanation   String?
 
   user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   Comment        Comment[]
   PlaylistLike   PlaylistLike[]
   PlaylistGenres PlaylistGenres[]
+}
+
+model PlaylistItems {
+  id          Int    @id @default(autoincrement())
+  playlistId  Int
+  trackId     String
+  title       String
+  artistName  String
+  imageUrl    String
+  externalUrl String
+  durationMs  Int
 }
 
 model Comment {
