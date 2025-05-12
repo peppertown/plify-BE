@@ -25,6 +25,8 @@ export const getAllPlaylistsDocs = {
             userProfileUrl: '유저 프로필 사진 url',
             postId: '아이디',
             playlistId: '플레이 리스트 아이디',
+            playlistName: '플레이리스트 이름',
+            imageUrl: '플레이리스트 썸네일 이미지 URL',
             likeCount: '좋아요 수',
             commentCount: '댓글 수',
             genre: ['장르 아이디 1', '장르 아이디2'],
@@ -117,6 +119,19 @@ export const getPlaylistDocs = {
     schema: {
       example: {
         explanation: '플레이리스트 설명',
+        externalUrl: 'Spotify 플레이리스트 원본 URL',
+        tracks: [
+          {
+            trackId: '트랙의 스포티파이 ID',
+            title: '트랙 제목',
+            artistName: '아티스트 이름',
+            imageUrl: '트랙 커버 이미지 URL',
+            externalUrl: '트랙 Spotify URL',
+            durationMs: '트랙 재생 시간 (ms)',
+          },
+        ],
+        totalTrack: '트랙 총 개수',
+        totalDuration: '총 재생 시간 (ms)',
         comment: [
           {
             commentId: '댓글 아이디',
@@ -235,6 +250,8 @@ export const getGenrePlaylistsDocs = {
             userProfileUrl: '유저 프로필 사진 url',
             postId: '아이디',
             playlistId: '플레이 리스트 아이디',
+            playlistName: '플레이리스트 이름',
+            imageUrl: '플레이리스트 썸네일 이미지 URL',
             likeCount: '좋아요 수',
             commentCount: '댓글 수',
             genre: ['장르 아이디 1', '장르 아이디2'],

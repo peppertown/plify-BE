@@ -67,7 +67,7 @@ export class PlaylistService {
       });
 
       const tracks = playlistDetail.PlaylistItems.map((i) => ({
-        trackId: i.id,
+        trackId: i.trackId,
         title: i.title,
         artistName: i.artistName,
         imageUrl: i.imageUrl,
