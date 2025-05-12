@@ -116,6 +116,29 @@ export class FollowService {
     }
   }
 
+  async deleteFollower(userId: number, targetUserId: number) {
+    try {
+      await this.prisma.userFollow.delete({
+        where: {
+          unique_following: {
+            followerId: targetUserId,
+            followeeId: userId,
+          },
+        },
+      });
+
+      return {
+        message: { code: 200, text: '팔로워 제거에 성공했습니다.' },
+      };
+    } catch (err) {
+      console.error('팔로워 목록 제거 중 에러 발생', err);
+      throw new HttpException(
+        '팔로워 목록 제거 중 오류가 발생했습니다.',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
   formatUserList(result: any) {
     return { id: result.id, name: result.name, profileUrl: result.profile_url };
   }

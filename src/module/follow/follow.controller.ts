@@ -1,5 +1,6 @@
 import {
   Controller,
+  Delete,
   Get,
   Param,
   ParseIntPipe,
@@ -50,5 +51,14 @@ export class FollowController {
   @getFollowingsDocs.response
   async getFollowings(@CurrentUserId() userId: number) {
     return await this.followService.getFollowings(userId);
+  }
+
+  @Delete(':targetUserId')
+  @UseGuards(AuthGuard('jwt'))
+  async deleteFollower(
+    @CurrentUserId() userId: number,
+    @Param('targetUserId', ParseIntPipe) targetUserId: number,
+  ) {
+    return await this.followService.deleteFollower(userId, targetUserId);
   }
 }
