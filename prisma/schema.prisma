@@ -161,8 +161,8 @@ model UserFollow {
   followeeId Int
   createdAt  DateTime @default(now())
 
-  follower User @relation("Followers", fields: [followerId], references: [id])
-  followee User @relation("Following", fields: [followeeId], references: [id])
+  follower User @relation("Followers", fields: [followerId], references: [id], onDelete: Cascade)
+  followee User @relation("Following", fields: [followeeId], references: [id], onDelete: Cascade)
 
   @@unique([followerId, followeeId], name: "unique_following")
 }
