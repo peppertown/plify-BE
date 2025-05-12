@@ -108,3 +108,27 @@ export const deleteFollowerDocs = {
     },
   }),
 };
+
+export const getFollowCountsDocs = {
+  operation: ApiOperation({
+    summary: '팔로워/팔로잉 수 조회 API',
+    description: '유저의 팔로워 수와 팔로잉 수를 반환합니다.',
+  }),
+
+  response: ApiResponse({
+    status: 200,
+    description: '팔로워 및 팔로잉 수 반환',
+    schema: {
+      example: {
+        message: {
+          code: 200,
+          text: '팔로우 수 조회에 성공했습니다.',
+        },
+        data: {
+          followerCount: 12,
+          followingCount: 8,
+        },
+      },
+    },
+  }),
+};

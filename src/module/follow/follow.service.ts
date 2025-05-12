@@ -139,6 +139,32 @@ export class FollowService {
     }
   }
 
+  async getUsersFollowCount(userId: number) {
+    try {
+      const [followerCount, followingCount] = await this.prisma.$transaction([
+        this.prisma.userFollow.count({ where: { followeeId: userId } }),
+        this.prisma.userFollow.count({ where: { followerId: userId } }),
+      ]);
+
+      return {
+        message: {
+          code: 200,
+          text: '팔로우 수 조회에 성공했습니다.',
+        },
+        data: {
+          followerCount,
+          followingCount,
+        },
+      };
+    } catch (err) {
+      console.error('팔로우 수 조회 중 에러 발생', err);
+      throw new HttpException(
+        '팔로우 수 조회 중 오류가 발생했습니다.',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
   formatUserList(result: any) {
     return { id: result.id, name: result.name, profileUrl: result.profile_url };
   }

@@ -12,6 +12,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
 import {
   deleteFollowerDocs,
+  getFollowCountsDocs,
   getFollowersDocs,
   getFollowingsDocs,
   handleUserFollowDocs,
@@ -52,6 +53,14 @@ export class FollowController {
   @getFollowingsDocs.response
   async getFollowings(@CurrentUserId() userId: number) {
     return await this.followService.getFollowings(userId);
+  }
+
+  @Get('count')
+  @UseGuards(AuthGuard('jwt'))
+  @getFollowCountsDocs.operation
+  @getFollowCountsDocs.response
+  async getUsersFollowCount(@CurrentUserId() userId: number) {
+    return await this.followService.getUsersFollowCount(userId);
   }
 
   @Delete(':targetUserId')
