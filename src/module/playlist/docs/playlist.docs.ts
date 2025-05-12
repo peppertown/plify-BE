@@ -66,6 +66,10 @@ export const addPlaylistDocs = {
           items: { type: 'number' },
           example: ['장르 아이디'],
         },
+        code: {
+          type: 'string',
+          example: '사용자의 스포티파이 엑세스 토큰',
+        },
       },
     },
   }),
