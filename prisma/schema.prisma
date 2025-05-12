@@ -53,6 +53,7 @@ model Playlist {
   Comment        Comment[]
   PlaylistLike   PlaylistLike[]
   PlaylistGenres PlaylistGenres[]
+  PlaylistItems  PlaylistItems[]
 }
 
 model PlaylistItems {
@@ -64,6 +65,10 @@ model PlaylistItems {
   imageUrl    String
   externalUrl String
   durationMs  Int
+
+  playlist Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+
+  @@index([playlistId]) 
 }
 
 model Comment {
