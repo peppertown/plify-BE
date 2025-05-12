@@ -58,8 +58,27 @@ export class PlaylistService {
 
       const playlistDetail = await this.prisma.playlist.findUnique({
         where: { id: postId },
-        select: { userId: true, explanation: true },
+        select: {
+          userId: true,
+          explanation: true,
+          externalUrl: true,
+          PlaylistItems: true,
+        },
       });
+
+      const tracks = playlistDetail.PlaylistItems.map((i) => ({
+        trackId: i.id,
+        title: i.title,
+        artistName: i.artistName,
+        imageUrl: i.imageUrl,
+        externalUrl: i.externalUrl,
+        durationMs: i.durationMs,
+      }));
+
+      const totalDuration = tracks.reduce(
+        (sum, track) => sum + track.durationMs,
+        0,
+      );
 
       const result = await this.prisma.comment.findMany({
         where: { postId },
@@ -90,6 +109,10 @@ export class PlaylistService {
       return {
         explanation: playlistDetail.explanation,
         comment,
+        externalUrl: playlistDetail.externalUrl,
+        tracks,
+        totalTrack: tracks.length,
+        totalDuration,
         commentCount: comment.length,
         isFollowed: !!isFollowed,
         message: {
