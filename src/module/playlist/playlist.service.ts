@@ -57,7 +57,7 @@ export class PlaylistService {
 
       const playlistDetail = await this.prisma.playlist.findUnique({
         where: { id: postId },
-        select: { explanation: true },
+        select: { userId: true, explanation: true },
       });
 
       const result = await this.prisma.comment.findMany({
@@ -82,10 +82,15 @@ export class PlaylistService {
 
       const comment = result.map((res) => this.getCommentObj(res));
 
+      const isFollowed = await this.prisma.userFollow.findFirst({
+        where: { followeeId: playlistDetail.userId, followerId: userId },
+      });
+
       return {
         explanation: playlistDetail.explanation,
         comment,
         commentCount: comment.length,
+        isFollowed: !!isFollowed,
         message: {
           code: 200,
           text: '개별 플레이리스트를 정상적으로 조회했습니다.',

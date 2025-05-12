@@ -127,6 +127,7 @@ export const getPlaylistDocs = {
             isLiked: '좋아요 여부',
           },
         ],
+        isFollowd: '팔로우 여부',
         commentCount: '댓글 개수',
         message: {
           code: 200,
