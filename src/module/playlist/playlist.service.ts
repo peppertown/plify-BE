@@ -1,6 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AddPlaylistDto } from './dto/addPlaylist.dto';
+import axios from 'axios';
 
 @Injectable()
 export class PlaylistService {
@@ -359,6 +360,28 @@ export class PlaylistService {
       likeCount: res._count.likes,
       isLiked: !!res.likes[0],
     };
+  }
+
+  async fetchPlaylist(playlistId: string, userAccessToken: string) {
+    const url = `${process.env.SPOTIFY_PLAYLIST_URL}/${playlistId}`;
+
+    const response = await axios.get(url, {
+      headers: {
+        Authorization: `Bearer ${userAccessToken}`,
+        'Accept-Language': 'ko',
+      },
+    });
+
+    const playlistData = response.data;
+
+    const playlist = {
+      id: playlistData.id,
+      image: playlistData.images[0].url,
+      name: playlistData.name,
+      userName: playlistData.owner.display_name,
+    };
+
+    return playlist;
   }
 
   async getAllGenres() {
