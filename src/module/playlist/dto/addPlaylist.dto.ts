@@ -11,4 +11,8 @@ export class AddPlaylistDto {
 
   @IsArray({ message: '장르 목록은 배열로 전달되어야합니다.' })
   genres: number[];
+
+  @IsNotEmpty({ message: '스포티파이 엑세스 토큰을 입력해주세요.' })
+  @IsString()
+  code: string;
 }

@@ -162,16 +162,29 @@ export class PlaylistService {
   // 플레이리스트 추가
   async addPlaylist(userId: number, addPlaylistDto: AddPlaylistDto) {
     try {
-      const { playlistUrl, explanation, genres } = addPlaylistDto;
+      const { playlistUrl, explanation, genres, code } = addPlaylistDto;
 
       const playlistId = this.extractPlaylistId(playlistUrl);
+
+      const playlistData = await this.fetchPlaylist(playlistId, code);
 
       const newPlaylist = await this.prisma.playlist.create({
         data: {
           userId,
           playlistId,
           explanation,
+          ...playlistData,
         },
+      });
+
+      let playlistItems = await this.fetchPlaylistItems(playlistId, code);
+      playlistItems = playlistItems.map((i) => ({
+        playlistId: newPlaylist.id,
+        ...i,
+      }));
+
+      await this.prisma.playlistItems.createMany({
+        data: playlistItems,
       });
 
       const genreData = genres.map((genre) => ({
@@ -375,8 +388,7 @@ export class PlaylistService {
     const playlistData = response.data;
 
     const playlist = {
-      id: playlistData.id,
-      image: playlistData.images[0].url,
+      imageUrl: playlistData.images[0].url,
       name: playlistData.name,
       userName: playlistData.owner.display_name,
     };
@@ -395,10 +407,11 @@ export class PlaylistService {
     });
 
     const tracks = response.data.items.map((i) => ({
-      name: i.track.name,
-      artists: i.track.artists.map((a) => a.name).join(', '),
+      trackId: i.track.id,
+      title: i.track.name,
+      artistName: i.track.artists.map((a) => a.name).join(', '),
       imageUrl: i.track.album.images?.[0]?.url,
-      spotifyUrl: i.track.external_urls.spotify,
+      externalUrl: i.track.external_urls.spotify,
       durationMs: i.track.duration_ms,
     }));
 
