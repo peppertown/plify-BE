@@ -23,6 +23,7 @@ model User {
   profile_url   String?
   password      String?
   createdAt     DateTime        @default(now())
+  lastLoginedAt DateTime?
   Playlist      Playlist[]
   Comment       Comment[]
   CommentLike   CommentLike[]
