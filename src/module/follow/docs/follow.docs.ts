@@ -23,6 +23,8 @@ export const handleUserFollowDocs = {
           code: 200,
           text: '팔로우가 완료됐습니다. | 팔로잉이 취소되었습니다.',
         },
+        followerCount: '상대 유저(targetUserId)의 팔로워 수',
+        followingCount: '상대 유저의 팔로잉 수',
       },
     },
   }),

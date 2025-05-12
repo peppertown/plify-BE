@@ -8,7 +8,7 @@ export class FollowService {
   async handleUserFollow(userId: number, targetUserId: number) {
     try {
       const existing = await this.prisma.userFollow.findFirst({
-        where: { followeeId: userId, followerId: targetUserId },
+        where: { followeeId: targetUserId, followerId: userId },
       });
 
       if (existing) {
@@ -17,9 +17,13 @@ export class FollowService {
         });
       } else {
         await this.prisma.userFollow.create({
-          data: { followeeId: userId, followerId: targetUserId },
+          data: { followeeId: targetUserId, followerId: userId },
         });
       }
+
+      const followData = await this.getUsersFollowCount(targetUserId);
+
+      const { followerCount, followingCount } = followData.data;
 
       return {
         message: {
@@ -28,6 +32,8 @@ export class FollowService {
             ? '팔로잉이 취소되었습니다.'
             : '팔로우가 완료됐습니다.',
         },
+        followerCount,
+        followingCount,
       };
     } catch (err) {
       console.error('팔로잉 토글 중 에러 발생', err);
