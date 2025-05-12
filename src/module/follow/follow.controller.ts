@@ -11,6 +11,7 @@ import { FollowService } from './follow.service';
 import { AuthGuard } from '@nestjs/passport';
 import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
 import {
+  deleteFollowerDocs,
   getFollowersDocs,
   getFollowingsDocs,
   handleUserFollowDocs,
@@ -55,6 +56,9 @@ export class FollowController {
 
   @Delete(':targetUserId')
   @UseGuards(AuthGuard('jwt'))
+  @deleteFollowerDocs.operation
+  @deleteFollowerDocs.param
+  @deleteFollowerDocs.response
   async deleteFollower(
     @CurrentUserId() userId: number,
     @Param('targetUserId', ParseIntPipe) targetUserId: number,

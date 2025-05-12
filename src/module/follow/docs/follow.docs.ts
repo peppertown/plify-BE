@@ -81,3 +81,30 @@ export const getFollowingsDocs = {
     },
   }),
 };
+
+export const deleteFollowerDocs = {
+  operation: ApiOperation({
+    summary: '팔로워 제거 API',
+    description: '나를 팔로우하고 있는 유저를 팔로워 목록에서 제거합니다.',
+  }),
+
+  param: ApiParam({
+    name: 'targetUserId',
+    required: true,
+    description: '팔로워 목록에서 제거할 유저 ID',
+    example: 42,
+  }),
+
+  response: ApiResponse({
+    status: 200,
+    description: '팔로워 제거 성공 시 반환 메시지',
+    schema: {
+      example: {
+        message: {
+          code: 200,
+          text: '팔로워 제거에 성공했습니다.',
+        },
+      },
+    },
+  }),
+};
