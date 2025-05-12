@@ -2,10 +2,16 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AddPlaylistDto } from './dto/addPlaylist.dto';
 import axios from 'axios';
+import { AuthService } from '../auth/auth.service';
+import { RedisService } from 'src/redis/redis.service';
 
 @Injectable()
 export class PlaylistService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly authService: AuthService,
+    private readonly redis: RedisService,
+  ) {}
 
   // 전체 플레이리스트 조회
   async getAllPlaylists(userId: number) {
@@ -185,11 +191,21 @@ export class PlaylistService {
   // 플레이리스트 추가
   async addPlaylist(userId: number, addPlaylistDto: AddPlaylistDto) {
     try {
-      const { playlistUrl, explanation, genres, code } = addPlaylistDto;
+      const { playlistUrl, explanation, genres } = addPlaylistDto;
+
+      const spotifyRefreshToken = await this.redis.get(
+        `${process.env.REFRESH_KEY_SPOTIFY}:${userId}`,
+      );
+
+      const spotifyAccessToken =
+        await this.authService.refreshSpotifyAccessToken(spotifyRefreshToken);
 
       const playlistId = this.extractPlaylistId(playlistUrl);
 
-      const playlistData = await this.fetchPlaylist(playlistId, code);
+      const playlistData = await this.fetchPlaylist(
+        playlistId,
+        spotifyAccessToken,
+      );
 
       const newPlaylist = await this.prisma.playlist.create({
         data: {
@@ -200,7 +216,10 @@ export class PlaylistService {
         },
       });
 
-      let playlistItems = await this.fetchPlaylistItems(playlistId, code);
+      let playlistItems = await this.fetchPlaylistItems(
+        playlistId,
+        spotifyAccessToken,
+      );
       playlistItems = playlistItems.map((i) => ({
         playlistId: newPlaylist.id,
         ...i,

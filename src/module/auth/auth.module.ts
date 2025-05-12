@@ -13,5 +13,6 @@ import { SpotifyStrategy } from './strategy/spotify.strategy';
   ],
   controllers: [AuthController],
   providers: [AuthService, SpotifyStrategy],
+  exports: [AuthService],
 })
 export class AuthModule {}
