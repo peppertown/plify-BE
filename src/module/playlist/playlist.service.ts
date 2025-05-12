@@ -350,6 +350,8 @@ export class PlaylistService {
       userProfileUrl: result.user.profile_url,
       postId: result.id,
       playlistId: result.playlistId,
+      playlistName: result.name,
+      imageUrl: result.imageUrl,
       likeCount: result._count.PlaylistLike,
       commentCount: result._count.Comment,
       genre: result.PlaylistGenres.map((data) => data.genre.name),
