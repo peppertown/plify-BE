@@ -376,46 +376,62 @@ export class PlaylistService {
   }
 
   async fetchPlaylist(playlistId: string, userAccessToken: string) {
-    const url = `${process.env.SPOTIFY_PLAYLIST_URL}/${playlistId}`;
+    try {
+      const url = `${process.env.SPOTIFY_PLAYLIST_URL}/${playlistId}`;
 
-    const response = await axios.get(url, {
-      headers: {
-        Authorization: `Bearer ${userAccessToken}`,
-        'Accept-Language': 'ko',
-      },
-    });
+      const response = await axios.get(url, {
+        headers: {
+          Authorization: `Bearer ${userAccessToken}`,
+          'Accept-Language': 'ko',
+        },
+      });
 
-    const playlistData = response.data;
+      const playlistData = response.data;
 
-    const playlist = {
-      imageUrl: playlistData.images[0].url,
-      name: playlistData.name,
-      userName: playlistData.owner.display_name,
-    };
+      const playlist = {
+        imageUrl: playlistData.images[0].url,
+        name: playlistData.name,
+        userName: playlistData.owner.display_name,
+      };
 
-    return playlist;
+      return playlist;
+    } catch (err) {
+      console.error('플레이리스트 페칭 중 에러 발생', err);
+      throw new HttpException(
+        '플레이리스트 페칭 중 오류가 발생했습니다.',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   async fetchPlaylistItems(playlistId: string, userAccessToken: string) {
-    const url = `${process.env.SPOTIFY_PLAYLIST_URL}/${playlistId}/tracks`;
+    try {
+      const url = `${process.env.SPOTIFY_PLAYLIST_URL}/${playlistId}/tracks`;
 
-    const response = await axios.get(url, {
-      headers: {
-        Authorization: `Bearer ${userAccessToken}`,
-        'Accept-Language': 'ko',
-      },
-    });
+      const response = await axios.get(url, {
+        headers: {
+          Authorization: `Bearer ${userAccessToken}`,
+          'Accept-Language': 'ko',
+        },
+      });
 
-    const tracks = response.data.items.map((i) => ({
-      trackId: i.track.id,
-      title: i.track.name,
-      artistName: i.track.artists.map((a) => a.name).join(', '),
-      imageUrl: i.track.album.images?.[0]?.url,
-      externalUrl: i.track.external_urls.spotify,
-      durationMs: i.track.duration_ms,
-    }));
+      const tracks = response.data.items.map((i) => ({
+        trackId: i.track.id,
+        title: i.track.name,
+        artistName: i.track.artists.map((a) => a.name).join(', '),
+        imageUrl: i.track.album.images?.[0]?.url,
+        externalUrl: i.track.external_urls.spotify,
+        durationMs: i.track.duration_ms,
+      }));
 
-    return tracks;
+      return tracks;
+    } catch (err) {
+      console.error('플레이리스트 아이템 페칭 중 에러 발생', err);
+      throw new HttpException(
+        '플레이리스트 아이템 페칭 중 오류가 발생했습니다.',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   async getAllGenres() {
