@@ -102,6 +102,7 @@ export class AuthService {
             email: spotifyUser.email,
             name: spotifyUser.displayName,
             profile_url: spotifyUser.profileImageUrl,
+            lastLoginedAt: new Date(),
           },
         });
       } else {
@@ -125,6 +126,7 @@ export class AuthService {
             nickname: finalNickname,
             profile_url: spotifyUser.profileImageUrl,
             auth_provider: 'spotify',
+            lastLoginedAt: new Date(),
           },
         });
       }
