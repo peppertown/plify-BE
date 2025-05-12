@@ -20,6 +20,7 @@ import {
   togglePlaylistLikeDocs,
   getGenresDocs,
   getGenrePlaylistsDocs,
+  handleDeletedPlaylistDocs,
 } from './docs/playlist.docs';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AddPlaylistDto } from './dto/addPlaylist.dto';
@@ -74,6 +75,16 @@ export class PlaylistController {
     @Query('genreId', ParseIntPipe) genreId: number,
   ) {
     return await this.playlistService.getGenrePlaylists(userId, genreId);
+  }
+
+  @Post('deleted')
+  @UseGuards(AuthGuard('jwt'))
+  @ApiBearerAuth()
+  @handleDeletedPlaylistDocs.operation
+  @handleDeletedPlaylistDocs.body
+  @handleDeletedPlaylistDocs.response
+  async handleDeleted(@Body('playlistId') playlistId: string) {
+    return await this.playlistService.handelDeleted(playlistId);
   }
 
   // 개별 플레이리스트 조회

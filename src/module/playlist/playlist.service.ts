@@ -243,6 +243,28 @@ export class PlaylistService {
     }
   }
 
+  // 삭제된 플레이리스트 삭제
+  async handelDeleted(playlistId: string) {
+    try {
+      await this.prisma.playlist.delete({
+        where: { playlistId },
+      });
+
+      return {
+        message: {
+          code: 200,
+          text: '삭제된 플레이리스트를 삭제했습니다.',
+        },
+      };
+    } catch (err) {
+      console.error('삭제된 플레이리스트 삭제 중 에러 발생', err);
+      throw new HttpException(
+        '삭제된 플레이리스트 삭제 중 오류가 발생했습니다.',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
   // 플레이리스트 좋아요 토글
   async togglePlaylistLike(userId: number, postId: number) {
     try {

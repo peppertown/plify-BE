@@ -246,3 +246,33 @@ export const getGenrePlaylistsDocs = {
     },
   }),
 };
+
+export const handleDeletedPlaylistDocs = {
+  operation: ApiOperation({
+    summary: '삭제된 Spotify 플레이리스트 삭제 API',
+    description:
+      'Spotify에서 삭제된 것으로 확인된 플레이리스트를 DB에서 제거합니다.',
+  }),
+
+  body: ApiBody({
+    description: '삭제할 플레이리스트의 Spotify playlistId',
+    schema: {
+      example: {
+        playlistId: '37i9dQZF1DXcBWIGoYBM5M',
+      },
+    },
+  }),
+
+  response: ApiResponse({
+    status: 200,
+    description: '삭제 완료 메시지 반환',
+    schema: {
+      example: {
+        message: {
+          code: 200,
+          text: '삭제된 플레이리스트를 삭제했습니다.',
+        },
+      },
+    },
+  }),
+};
