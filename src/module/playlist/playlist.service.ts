@@ -384,6 +384,27 @@ export class PlaylistService {
     return playlist;
   }
 
+  async fetchPlaylistItems(playlistId: string, userAccessToken: string) {
+    const url = `${process.env.SPOTIFY_PLAYLIST_URL}/${playlistId}/tracks`;
+
+    const response = await axios.get(url, {
+      headers: {
+        Authorization: `Bearer ${userAccessToken}`,
+        'Accept-Language': 'ko',
+      },
+    });
+
+    const tracks = response.data.items.map((i) => ({
+      name: i.track.name,
+      artists: i.track.artists.map((a) => a.name).join(', '),
+      imageUrl: i.track.album.images?.[0]?.url,
+      spotifyUrl: i.track.external_urls.spotify,
+      durationMs: i.track.duration_ms,
+    }));
+
+    return tracks;
+  }
+
   async getAllGenres() {
     try {
       const genres = await this.prisma.genre.findMany({
