@@ -16,7 +16,7 @@ export class PlaylistService {
   // 전체 플레이리스트 조회
   async getAllPlaylists(userId: number) {
     try {
-      const result = await this.prisma.playlist.findMany({
+      let result = await this.prisma.playlist.findMany({
         orderBy: { id: 'desc' },
         include: {
           _count: { select: { PlaylistLike: true, Comment: true } },
@@ -34,6 +34,39 @@ export class PlaylistService {
           },
         },
       });
+
+      const twelveHoursAgo = new Date(Date.now() - 12 * 60 * 60 * 1000);
+
+      const shouldRefetch = result
+        .filter((res) => new Date(res.lastFetchedAt) < twelveHoursAgo)
+        .map((res) => res.playlistId);
+
+      if (shouldRefetch.length) {
+        await Promise.all(
+          shouldRefetch.map((playlist) =>
+            this.refetchPlaylist(userId, playlist),
+          ),
+        );
+
+        result = await this.prisma.playlist.findMany({
+          orderBy: { id: 'desc' },
+          include: {
+            _count: { select: { PlaylistLike: true, Comment: true } },
+            PlaylistGenres: { select: { genre: { select: { name: true } } } },
+
+            PlaylistLike: { where: { userId }, select: { id: true } },
+            user: {
+              select: {
+                id: true,
+                email: true,
+                name: true,
+                nickname: true,
+                profile_url: true,
+              },
+            },
+          },
+        });
+      }
 
       const playlists = result.map((res) => this.getPlaylistObj(res));
 
@@ -474,6 +507,50 @@ export class PlaylistService {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
+  }
+
+  async refetchPlaylist(userId: number, playlistId: string) {
+    const spotifyRefreshToken = await this.redis.get(
+      `${process.env.REFRESH_KEY_SPOTIFY}:${userId}`,
+    );
+
+    const spotifyAccessToken =
+      await this.authService.refreshSpotifyAccessToken(spotifyRefreshToken);
+
+    const playlistData = await this.fetchPlaylist(
+      playlistId,
+      spotifyAccessToken,
+    );
+
+    const { userName, name, imageUrl } = playlistData;
+
+    const playlistItems = await this.fetchPlaylistItems(
+      playlistId,
+      spotifyAccessToken,
+    );
+
+    await this.prisma.$transaction(async (tx) => {
+      const playlist = await tx.playlist.update({
+        where: { playlistId },
+        data: {
+          userName,
+          name,
+          imageUrl,
+          lastFetchedAt: new Date(),
+        },
+      });
+
+      await tx.playlistItems.deleteMany({
+        where: { playlistId: playlist.id },
+      });
+
+      await tx.playlistItems.createMany({
+        data: playlistItems.map((item) => ({
+          playlistId: playlist.id,
+          ...item,
+        })),
+      });
+    });
   }
 
   async getAllGenres() {
