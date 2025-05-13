@@ -207,37 +207,32 @@ export class PlaylistService {
         spotifyAccessToken,
       );
 
-      const newPlaylist = await this.prisma.playlist.create({
-        data: {
-          userId,
-          playlistId,
-          explanation,
-          ...playlistData,
-        },
-      });
-
-      let playlistItems = await this.fetchPlaylistItems(
+      const playlistItems = await this.fetchPlaylistItems(
         playlistId,
         spotifyAccessToken,
       );
-      playlistItems = playlistItems.map((i) => ({
-        playlistId: newPlaylist.id,
-        ...i,
-      }));
 
-      await this.prisma.playlistItems.createMany({
-        data: playlistItems,
+      const newPlaylist = await this.prisma.$transaction(async (tx) => {
+        const createdPlaylist = await tx.playlist.create({
+          data: { userId, playlistId, explanation, ...playlistData },
+        });
+
+        await tx.playlistItems.createMany({
+          data: playlistItems.map((i) => ({
+            playlistId: createdPlaylist.id,
+            ...i,
+          })),
+        });
+
+        await tx.playlistGenres.createMany({
+          data: genres.map((genre) => ({
+            playlistId: createdPlaylist.id,
+            genreId: genre,
+          })),
+        });
+
+        return createdPlaylist;
       });
-
-      const genreData = genres.map((genre) => ({
-        playlistId: newPlaylist.id,
-        genreId: genre,
-      }));
-
-      await this.prisma.playlistGenres.createMany({
-        data: genreData,
-      });
-
       return {
         message: {
           code: 200,
