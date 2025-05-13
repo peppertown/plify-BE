@@ -125,6 +125,7 @@ export const getPlaylistDocs = {
             trackId: '트랙의 스포티파이 ID',
             title: '트랙 제목',
             artistName: '아티스트 이름',
+            artistExternalUrl: '아티스트 스포티파이 url',
             imageUrl: '트랙 커버 이미지 URL',
             externalUrl: '트랙 Spotify URL',
             durationMs: '트랙 재생 시간 (ms)',
