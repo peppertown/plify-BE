@@ -2,11 +2,16 @@ import { playlistBaseInclude } from './helpers/playlist.query.option';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AddPlaylistDto } from './dto/addPlaylist.dto';
-import axios from 'axios';
 import { AuthService } from '../auth/auth.service';
 import { RedisService } from 'src/redis/redis.service';
 import { UpdatePlaylistDto } from './dto/updatePlaylist.dto';
 import { formatComment, formatPlaylist } from 'src/utils/formatter';
+import {
+  extractPlaylistId,
+  fetchPlaylist,
+  fetchPlaylistItems,
+  refetchPlaylist,
+} from 'src/utils/spotify';
 
 @Injectable()
 export class PlaylistService {
@@ -32,9 +37,7 @@ export class PlaylistService {
 
       if (shouldRefetch.length) {
         await Promise.all(
-          shouldRefetch.map((playlist) =>
-            this.refetchPlaylist(userId, playlist),
-          ),
+          shouldRefetch.map((playlist) => refetchPlaylist(userId, playlist)),
         );
 
         result = await this.prisma.playlist.findMany({
@@ -151,6 +154,7 @@ export class PlaylistService {
     }
   }
 
+  // 장르별 플레이리스트 조회
   async getGenrePlaylists(userId: number, genreId: number) {
     try {
       const result = await this.prisma.playlist.findMany({
@@ -195,14 +199,11 @@ export class PlaylistService {
       const spotifyAccessToken =
         await this.authService.refreshSpotifyAccessToken(spotifyRefreshToken);
 
-      const playlistId = this.extractPlaylistId(playlistUrl);
+      const playlistId = extractPlaylistId(playlistUrl);
 
-      const playlistData = await this.fetchPlaylist(
-        playlistId,
-        spotifyAccessToken,
-      );
+      const playlistData = await fetchPlaylist(playlistId, spotifyAccessToken);
 
-      const playlistItems = await this.fetchPlaylistItems(
+      const playlistItems = await fetchPlaylistItems(
         playlistId,
         spotifyAccessToken,
       );
@@ -245,6 +246,47 @@ export class PlaylistService {
       console.error('플레이리스트 생성 중 에러 발생', err);
       throw new HttpException(
         '플레이리스트 생성 중 오류가 발생했습니다',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  // 플레이리스트 수정
+  async updatePlaylist(postId: number, updatePlaylistDto: UpdatePlaylistDto) {
+    try {
+      const { explanation, genres } = updatePlaylistDto;
+
+      await this.prisma.$transaction(async (prisma) => {
+        if (explanation) {
+          await prisma.playlist.update({
+            where: { id: postId },
+            data: { explanation },
+          });
+        }
+
+        if (genres) {
+          await prisma.playlistGenres.deleteMany({
+            where: { playlistId: postId },
+          });
+
+          const data = genres.map((i) => ({
+            playlistId: postId,
+            genreId: i,
+          }));
+
+          await prisma.playlistGenres.createMany({
+            data,
+          });
+        }
+      });
+
+      return {
+        message: { code: 200, text: '플레이리스트 수정이 완료됐습니다' },
+      };
+    } catch (err) {
+      console.error('플레이리스트 수정 중 에러 발생', err);
+      throw new HttpException(
+        '플레이리스트 수정 중 오류가 발생했습니다.',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -360,132 +402,7 @@ export class PlaylistService {
     }
   }
 
-  // 플레이리스트 id 추출
-  extractPlaylistId(url: string): string {
-    const regex = /playlist\/([a-zA-Z0-9]+)/;
-    const match = url.match(regex);
-    if (match && match[1]) {
-      return match[1];
-    }
-    throw new HttpException(
-      '유효하지 않은 플레이리스트 주소입니다.',
-      HttpStatus.BAD_REQUEST,
-    );
-  }
-
-  async fetchPlaylist(playlistId: string, userAccessToken: string) {
-    try {
-      const url = `${process.env.SPOTIFY_PLAYLIST_URL}/${playlistId}`;
-
-      const response = await axios.get(url, {
-        headers: {
-          Authorization: `Bearer ${userAccessToken}`,
-          'Accept-Language': 'ko',
-        },
-      });
-
-      const playlistData = response.data;
-
-      const playlist = {
-        imageUrl: playlistData.images[0].url,
-        name: playlistData.name,
-        userName: playlistData.owner.display_name,
-        externalUrl: playlistData.external_urls.spotify,
-      };
-
-      return playlist;
-    } catch (err) {
-      console.error('플레이리스트 페칭 중 에러 발생', err);
-      throw new HttpException(
-        '플레이리스트 페칭 중 오류가 발생했습니다.',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
-  }
-
-  async fetchPlaylistItems(playlistId: string, userAccessToken: string) {
-    try {
-      const url = `${process.env.SPOTIFY_PLAYLIST_URL}/${playlistId}/tracks`;
-
-      const response = await axios.get(url, {
-        headers: {
-          Authorization: `Bearer ${userAccessToken}`,
-          'Accept-Language': 'ko',
-        },
-      });
-
-      const tracks = response.data.items.map((i) => ({
-        trackId: i.track.id,
-        title: i.track.name,
-        artistName: i.track.artists.map((a) => a.name).join(', '),
-        artistExternalUrl: i.track.artists[0].external_urls.spotify,
-        imageUrl: i.track.album.images?.[0]?.url,
-        externalUrl: i.track.external_urls.spotify,
-        durationMs: i.track.duration_ms,
-      }));
-
-      return tracks;
-    } catch (err) {
-      console.error('플레이리스트 아이템 페칭 중 에러 발생', err);
-      throw new HttpException(
-        '플레이리스트 아이템 페칭 중 오류가 발생했습니다.',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
-  }
-
-  async refetchPlaylist(userId: number, playlistId: string) {
-    try {
-      const spotifyRefreshToken = await this.redis.get(
-        `${process.env.REFRESH_KEY_SPOTIFY}:${userId}`,
-      );
-
-      const spotifyAccessToken =
-        await this.authService.refreshSpotifyAccessToken(spotifyRefreshToken);
-
-      const playlistData = await this.fetchPlaylist(
-        playlistId,
-        spotifyAccessToken,
-      );
-
-      const { userName, name, imageUrl } = playlistData;
-
-      const playlistItems = await this.fetchPlaylistItems(
-        playlistId,
-        spotifyAccessToken,
-      );
-
-      await this.prisma.$transaction(async (tx) => {
-        const playlist = await tx.playlist.update({
-          where: { playlistId },
-          data: {
-            userName,
-            name,
-            imageUrl,
-            lastFetchedAt: new Date(),
-          },
-        });
-
-        await tx.playlistItems.deleteMany({
-          where: { playlistId: playlist.id },
-        });
-
-        await tx.playlistItems.createMany({
-          data: playlistItems.map((item) => ({
-            playlistId: playlist.id,
-            ...item,
-          })),
-        });
-      });
-    } catch (err) {
-      console.error('플레이리스트 리페칭 중 에러 발생', err);
-      throw new HttpException(
-        '플레이리스트 리페칭 중 오류가 발생했습니다.',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
-  }
-
+  // 장르 조회
   async getAllGenres() {
     try {
       const genres = await this.prisma.genre.findMany({
@@ -494,7 +411,7 @@ export class PlaylistService {
           name: true,
         },
         orderBy: {
-          name: 'asc', // 가나다순 or 인기순 등 필요시 조정
+          name: 'asc',
         },
       });
 
@@ -509,46 +426,6 @@ export class PlaylistService {
       console.error('장르 데이터 조회 중 에러 발생', err);
       throw new HttpException(
         '장르 데이터 조회 중 오류가 발생했습니다',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
-  }
-
-  async updatePlaylist(postId: number, updatePlaylistDto: UpdatePlaylistDto) {
-    try {
-      const { explanation, genres } = updatePlaylistDto;
-
-      await this.prisma.$transaction(async (prisma) => {
-        if (explanation) {
-          await prisma.playlist.update({
-            where: { id: postId },
-            data: { explanation },
-          });
-        }
-
-        if (genres) {
-          await prisma.playlistGenres.deleteMany({
-            where: { playlistId: postId },
-          });
-
-          const data = genres.map((i) => ({
-            playlistId: postId,
-            genreId: i,
-          }));
-
-          await prisma.playlistGenres.createMany({
-            data,
-          });
-        }
-      });
-
-      return {
-        message: { code: 200, text: '플레이리스트 수정이 완료됐습니다' },
-      };
-    } catch (err) {
-      console.error('플레이리스트 수정 중 에러 발생', err);
-      throw new HttpException(
-        '플레이리스트 수정 중 오류가 발생했습니다.',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
