@@ -1,3 +1,4 @@
+import { playlistBaseInclude } from './helpers/playlist.query.option';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AddPlaylistDto } from './dto/addPlaylist.dto';
@@ -19,21 +20,7 @@ export class PlaylistService {
     try {
       let result = await this.prisma.playlist.findMany({
         orderBy: { id: 'desc' },
-        include: {
-          _count: { select: { PlaylistLike: true, Comment: true } },
-          PlaylistGenres: { select: { genre: { select: { name: true } } } },
-
-          PlaylistLike: { where: { userId }, select: { id: true } },
-          user: {
-            select: {
-              id: true,
-              email: true,
-              name: true,
-              nickname: true,
-              profile_url: true,
-            },
-          },
-        },
+        include: playlistBaseInclude(userId),
       });
 
       const twelveHoursAgo = new Date(Date.now() - 12 * 60 * 60 * 1000);
@@ -51,21 +38,7 @@ export class PlaylistService {
 
         result = await this.prisma.playlist.findMany({
           orderBy: { id: 'desc' },
-          include: {
-            _count: { select: { PlaylistLike: true, Comment: true } },
-            PlaylistGenres: { select: { genre: { select: { name: true } } } },
-
-            PlaylistLike: { where: { userId }, select: { id: true } },
-            user: {
-              select: {
-                id: true,
-                email: true,
-                name: true,
-                nickname: true,
-                profile_url: true,
-              },
-            },
-          },
+          include: playlistBaseInclude(userId),
         });
       }
 
@@ -188,21 +161,7 @@ export class PlaylistService {
           },
         },
         orderBy: { id: 'desc' },
-        include: {
-          _count: { select: { PlaylistLike: true, Comment: true } },
-          PlaylistGenres: { select: { genre: { select: { name: true } } } },
-
-          PlaylistLike: { where: { userId }, select: { id: true } },
-          user: {
-            select: {
-              id: true,
-              email: true,
-              name: true,
-              nickname: true,
-              profile_url: true,
-            },
-          },
-        },
+        include: playlistBaseInclude(userId),
       });
 
       const playlists = result.map((res) => this.getPlaylistObj(res));
