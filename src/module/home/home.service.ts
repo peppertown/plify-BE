@@ -3,6 +3,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { endOfWeek, startOfWeek } from 'date-fns';
 import { PlaylistService } from '../playlist/playlist.service';
 import { playlistBaseInclude } from '../playlist/helpers/playlist.query.option';
+import { formatPlaylist } from 'src/utils/formatter';
 
 @Injectable()
 export class HomeService {
@@ -32,9 +33,7 @@ export class HomeService {
         include: playlistBaseInclude(userId),
       });
 
-      const playlist = result.map((res) =>
-        this.playlistService.getPlaylistObj(res),
-      );
+      const playlist = result.map((res) => formatPlaylist(res));
 
       return {
         message: {
@@ -69,9 +68,7 @@ export class HomeService {
         include: playlistBaseInclude(userId),
       });
 
-      const playlist = playlistData.map((res) =>
-        this.playlistService.getPlaylistObj(res),
-      );
+      const playlist = playlistData.map((res) => formatPlaylist(res));
 
       return {
         message: {

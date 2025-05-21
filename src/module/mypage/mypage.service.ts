@@ -3,6 +3,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { PlaylistService } from '../playlist/playlist.service';
 import { playlistBaseInclude } from '../playlist/helpers/playlist.query.option';
 import { FollowService } from '../follow/follow.service';
+import { formatPlaylist } from 'src/utils/formatter';
 
 @Injectable()
 export class MypageService {
@@ -21,9 +22,7 @@ export class MypageService {
         include: playlistBaseInclude(userId),
       });
 
-      const playlist = result.map((res) =>
-        this.playlistService.getPlaylistObj(res),
-      );
+      const playlist = result.map((res) => formatPlaylist(res));
 
       return {
         playlist,

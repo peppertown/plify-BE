@@ -6,6 +6,7 @@ import axios from 'axios';
 import { AuthService } from '../auth/auth.service';
 import { RedisService } from 'src/redis/redis.service';
 import { UpdatePlaylistDto } from './dto/updatePlaylist.dto';
+import { formatComment, formatPlaylist } from 'src/utils/formatter';
 
 @Injectable()
 export class PlaylistService {
@@ -42,7 +43,7 @@ export class PlaylistService {
         });
       }
 
-      const playlists = result.map((res) => this.getPlaylistObj(res));
+      const playlists = result.map((res) => formatPlaylist(res));
 
       return {
         playlists,
@@ -114,7 +115,7 @@ export class PlaylistService {
         },
       });
 
-      const comment = result.map((res) => this.getCommentObj(res));
+      const comment = result.map((res) => formatComment(res));
 
       const isFollowed = await this.prisma.userFollow.findFirst({
         where: { followeeId: playlistDetail.userId, followerId: userId },
@@ -164,7 +165,7 @@ export class PlaylistService {
         include: playlistBaseInclude(userId),
       });
 
-      const playlists = result.map((res) => this.getPlaylistObj(res));
+      const playlists = result.map((res) => formatPlaylist(res));
 
       return {
         playlists,
@@ -370,42 +371,6 @@ export class PlaylistService {
       '유효하지 않은 플레이리스트 주소입니다.',
       HttpStatus.BAD_REQUEST,
     );
-  }
-
-  // 응답데이터 포맷
-  getPlaylistObj(result: any) {
-    return {
-      userId: result.user.id,
-      userName: result.user.name,
-      userNickname: result.user.nickname,
-      userProfileUrl: result.user.profile_url,
-      postId: result.id,
-      playlistId: result.playlistId,
-      playlistName: result.name,
-      imageUrl: result.imageUrl,
-      likeCount: result._count.PlaylistLike,
-      commentCount: result._count.Comment,
-      genre: result.PlaylistGenres.map((data) => data.genre.name),
-      isLiked: !!result.PlaylistLike[0],
-      viewCount: result.viewCount,
-      createdAt: result.createdAt,
-    };
-  }
-
-  // 댓글 응답데이터 포맷
-  getCommentObj(res: any) {
-    return {
-      commentId: res.id,
-      postId: res.postId,
-      userId: res.userId,
-      userName: res.user.name,
-      userNickname: res.user.nickname,
-      userProfileUrl: res.user.profile_url,
-      content: res.content,
-      createdAt: res.createdAt,
-      likeCount: res._count.likes,
-      isLiked: !!res.likes[0],
-    };
   }
 
   async fetchPlaylist(playlistId: string, userAccessToken: string) {
