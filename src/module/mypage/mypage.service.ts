@@ -1,6 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { PlaylistService } from '../playlist/playlist.service';
+import { playlistBaseInclude } from '../playlist/helpers/playlist.query.option';
 import { FollowService } from '../follow/follow.service';
 
 @Injectable()
@@ -17,21 +18,7 @@ export class MypageService {
       const result = await this.prisma.playlist.findMany({
         where: mine ? { userId } : { PlaylistLike: { some: { userId } } },
         orderBy: { id: 'desc' },
-        include: {
-          _count: { select: { PlaylistLike: true, Comment: true } },
-          PlaylistGenres: { select: { genre: { select: { name: true } } } },
-
-          PlaylistLike: { where: { userId }, select: { id: true } },
-          user: {
-            select: {
-              id: true,
-              email: true,
-              name: true,
-              nickname: true,
-              profile_url: true,
-            },
-          },
-        },
+        include: playlistBaseInclude(userId),
       });
 
       const playlist = result.map((res) =>

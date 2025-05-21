@@ -2,6 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { endOfWeek, startOfWeek } from 'date-fns';
 import { PlaylistService } from '../playlist/playlist.service';
+import { playlistBaseInclude } from '../playlist/helpers/playlist.query.option';
 
 @Injectable()
 export class HomeService {
@@ -28,21 +29,7 @@ export class HomeService {
 
         take: 5,
 
-        include: {
-          _count: { select: { PlaylistLike: true, Comment: true } },
-          PlaylistGenres: { select: { genre: { select: { name: true } } } },
-
-          PlaylistLike: { where: { userId }, select: { id: true } },
-          user: {
-            select: {
-              id: true,
-              email: true,
-              name: true,
-              nickname: true,
-              profile_url: true,
-            },
-          },
-        },
+        include: playlistBaseInclude(userId),
       });
 
       const playlist = result.map((res) =>
@@ -79,21 +66,7 @@ export class HomeService {
         where: { userId: { in: followingIds } },
         orderBy: { id: 'desc' },
         take: 10,
-        include: {
-          _count: { select: { PlaylistLike: true, Comment: true } },
-          PlaylistGenres: { select: { genre: { select: { name: true } } } },
-
-          PlaylistLike: { where: { userId }, select: { id: true } },
-          user: {
-            select: {
-              id: true,
-              email: true,
-              name: true,
-              nickname: true,
-              profile_url: true,
-            },
-          },
-        },
+        include: playlistBaseInclude(userId),
       });
 
       const playlist = playlistData.map((res) =>
