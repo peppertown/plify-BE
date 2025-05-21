@@ -4,6 +4,7 @@ import { AddPlaylistDto } from './dto/addPlaylist.dto';
 import axios from 'axios';
 import { AuthService } from '../auth/auth.service';
 import { RedisService } from 'src/redis/redis.service';
+import { UpdatePlaylistDto } from './dto/updatePlaylist.dto';
 
 @Injectable()
 export class PlaylistService {
@@ -576,6 +577,46 @@ export class PlaylistService {
       console.error('장르 데이터 조회 중 에러 발생', err);
       throw new HttpException(
         '장르 데이터 조회 중 오류가 발생했습니다',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async updatePlaylist(postId: number, updatePlaylistDto: UpdatePlaylistDto) {
+    try {
+      const { explanation, genres } = updatePlaylistDto;
+
+      await this.prisma.$transaction(async (prisma) => {
+        if (explanation) {
+          await prisma.playlist.update({
+            where: { id: postId },
+            data: { explanation },
+          });
+        }
+
+        if (genres) {
+          await prisma.playlistGenres.deleteMany({
+            where: { playlistId: postId },
+          });
+
+          const data = genres.map((i) => ({
+            playlistId: postId,
+            genreId: i,
+          }));
+
+          await prisma.playlistGenres.createMany({
+            data,
+          });
+        }
+      });
+
+      return {
+        message: { code: 200, text: '플레이리스트 수정이 완료됐습니다' },
+      };
+    } catch (err) {
+      console.error('플레이리스트 수정 중 에러 발생', err);
+      throw new HttpException(
+        '플레이리스트 수정 중 오류가 발생했습니다.',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }

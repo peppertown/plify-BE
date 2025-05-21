@@ -6,6 +6,7 @@ import {
   Param,
   ParseIntPipe,
   Post,
+  Put,
   Query,
   UseGuards,
 } from '@nestjs/common';
@@ -24,6 +25,7 @@ import {
 } from './docs/playlist.docs';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AddPlaylistDto } from './dto/addPlaylist.dto';
+import { UpdatePlaylistDto } from './dto/updatePlaylist.dto';
 
 @ApiTags('playlist')
 @Controller('playlist')
@@ -126,5 +128,14 @@ export class PlaylistController {
     @Param('postId', ParseIntPipe) postId: number,
   ) {
     return await this.playlistService.togglePlaylistLike(userId, postId);
+  }
+
+  @Put(':postId')
+  @UseGuards(AuthGuard('jwt'))
+  async updatePlaylist(
+    @Param('postId') postId: number,
+    @Body() updatePlaylistDto: UpdatePlaylistDto,
+  ) {
+    return await this.playlistService.updatePlaylist(postId, updatePlaylistDto);
   }
 }
