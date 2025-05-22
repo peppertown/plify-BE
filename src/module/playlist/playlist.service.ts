@@ -10,7 +10,6 @@ import {
   extractPlaylistId,
   fetchPlaylist,
   fetchPlaylistItems,
-  refetchPlaylist,
 } from 'src/utils/spotify';
 
 @Injectable()
@@ -37,7 +36,9 @@ export class PlaylistService {
 
       if (shouldRefetch.length) {
         await Promise.all(
-          shouldRefetch.map((playlist) => refetchPlaylist(userId, playlist)),
+          shouldRefetch.map((playlist) =>
+            this.refetchPlaylist(userId, playlist),
+          ),
         );
 
         result = await this.prisma.playlist.findMany({
@@ -426,6 +427,56 @@ export class PlaylistService {
       console.error('장르 데이터 조회 중 에러 발생', err);
       throw new HttpException(
         '장르 데이터 조회 중 오류가 발생했습니다',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  // 플레이리스트 리페칭
+  async refetchPlaylist(userId: number, playlistId: string) {
+    try {
+      const spotifyRefreshToken = await this.redis.get(
+        `${process.env.REFRESH_KEY_SPOTIFY}:${userId}`,
+      );
+
+      const spotifyAccessToken =
+        await this.authService.refreshSpotifyAccessToken(spotifyRefreshToken);
+
+      const playlistData = await fetchPlaylist(playlistId, spotifyAccessToken);
+
+      const { userName, name, imageUrl } = playlistData;
+
+      const playlistItems = await fetchPlaylistItems(
+        playlistId,
+        spotifyAccessToken,
+      );
+
+      await this.prisma.$transaction(async (tx) => {
+        const playlist = await tx.playlist.update({
+          where: { playlistId },
+          data: {
+            userName,
+            name,
+            imageUrl,
+            lastFetchedAt: new Date(),
+          },
+        });
+
+        await tx.playlistItems.deleteMany({
+          where: { playlistId: playlist.id },
+        });
+
+        await tx.playlistItems.createMany({
+          data: playlistItems.map((item) => ({
+            playlistId: playlist.id,
+            ...item,
+          })),
+        });
+      });
+    } catch (err) {
+      console.error('플레이리스트 리페칭 중 에러 발생', err);
+      throw new HttpException(
+        '플레이리스트 리페칭 중 오류가 발생했습니다.',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
