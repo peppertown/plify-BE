@@ -10,6 +10,7 @@ export class RedisService implements OnModuleInit {
     this.client = new Redis({
       host: this.configService.get('REDIS_HOST'),
       port: this.configService.get('REDIS_PORT'),
+      password: this.configService.get('REDIS_PASSWORD'),
     });
   }
 
