@@ -1,99 +1,77 @@
+## 🎵 FLIP : 스포티파이 플레이리스트 공유 플랫폼
+
+### 나만 듣기 아쉬운 플레이리스트, 이제 함께 들어요!
+
+Spotify에서 만든 나만의 플레이리스트, 혼자 듣기 아깝지 않으셨나요? FLIP에서 다른 사람들과 플레이리스트를 공유하고, 댓글로 소통하며 음악 취향을 나눠보세요. 새로운 음악도 발견하고, 취향이 맞는 친구도 만날 수 있어요!
+
+## ⚒️ Tech Spec.
+
+### 📌 Backend
+
+- **Language:** TypeScript
+- **Framework:** NestJS
+- **Database / ORM:** MySQL, Prisma
+- **Caching:** Redis
+
+### 📌 외부 서비스
+
+- **Spotify Web API**
+
+### 📌 ERD
+
 <p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
+<img width="1324" height="1315" alt="Image" src="https://github.com/user-attachments/assets/90a28e78-404f-42c9-b1e3-bbcbd1fd010c" />
 </p>
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+### 👩🏻‍💻 간편한 Spotify 로그인
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
+복잡한 가입 절차 없이 Spotify 계정으로 간편하게 로그인하세요.로그인 후 바로 FLIP의 모든 기능을 편리하게 이용할 수 있습니다.
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/6fae81da-5c86-4521-8e1c-69a6e7f46b90" width="30%" />
+  <img src="https://github.com/user-attachments/assets/3f9350b9-51e9-4a00-b8a4-79a53fd10f2a" width="30%" />
+  <img src="https://github.com/user-attachments/assets/23b7ed07-c3ca-4f9c-984a-8823c23a8710" width="30%" />
 </p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
-## Description
+### 🎧 플레이리스트 발견하기
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+매일 듣던 음악이 지겨워졌다면, 다양한 플레이리스트를 탐색해보세요."Spotify에서 열기" 버튼만 누르면 플레이리스트가 바로 재생됩니다. 마음에 드는 플레이리스트에는 좋아요와 댓글을 남겨보세요!
 
-## Project setup
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/6bd526fa-881c-4fd9-97fd-b0397c37c432" width="20%">
+  <img src="https://github.com/user-attachments/assets/df4a61e1-480d-49e8-87af-4e31b55e3ed5" width="20%">
+  <img src="https://github.com/user-attachments/assets/de8c289a-8f6c-4122-b69d-42d069a5833c" width="20%">
+  <img src="https://github.com/user-attachments/assets/7cb22c65-59c6-44aa-b33b-3db740647fa3" width="20%">
+</p>
 
-```bash
-$ npm install
-```
+### 🚀 플레이리스트 공유하기
 
-## Compile and run the project
+나만 알고 있기 아까운 나의 플레이리스트를 FLIP에서 손쉽게 공유해보세요.장르를 선택해 더욱 다양한 플레이리스트를 공유할 수 있습니다!
 
-```bash
-# development
-$ npm run start
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/6e579264-47ba-4a67-b2ff-f473429db961" width="20%">
+  <img src="https://github.com/user-attachments/assets/4ce98d4c-dd57-4693-bcb4-1e61f462680c" width="20%">
+  <img src="https://github.com/user-attachments/assets/387762a6-aacb-4df4-bd9c-a5ddad9058af" width="20%">
+  <img src="https://github.com/user-attachments/assets/f7d80789-5c35-4efb-9ff2-c5d68762ff42" width="20%">
+</p>
 
-# watch mode
-$ npm run start:dev
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/cb7c8760-b5d1-41c6-a7f7-5f316ebdfd3e" width="30%">
+  <img src="https://github.com/user-attachments/assets/c397a835-a483-41cf-b492-44351292d845" width="30%">
+</p>
 
-# production mode
-$ npm run start:prod
-```
+### 스탯
 
-## Run tests
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/6e0a3896-c440-4cde-918a-13387d9d5533" width="30%">
+  <img src="https://github.com/user-attachments/assets/e92cb8f3-e453-48e6-a427-3a88fe087468" width="30%">
+  <img src="https://github.com/user-attachments/assets/c25f660d-8a50-443e-8123-5f719c24a32e" width="30%">
+</p>
 
-```bash
-# unit tests
-$ npm run test
+### 마이페이지
 
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
-```
-
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ npm install -g mau
-$ mau deploy
-```
-
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
-
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/7046cc66-1d99-4d1e-91c1-ced629559924" width="30%">
+  <img src="https://github.com/user-attachments/assets/2fb76042-7222-42e2-a04c-16f735d0453d" width="30%">
+  <img src="https://github.com/user-attachments/assets/a87c82eb-2984-4182-8534-2039bc4b607d" width="30%">
+</p>
