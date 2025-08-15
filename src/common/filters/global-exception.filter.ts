@@ -95,6 +95,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       },
       error: {
         errorId,
+        code,
         timestamp: new Date().toISOString(),
         path: request.url,
         method: request.method,
