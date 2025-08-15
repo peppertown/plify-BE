@@ -10,7 +10,7 @@ import { RankModule } from './module/rank/rank.module';
 import { MypageModule } from './module/mypage/mypage.module';
 import { HomeModule } from './module/home/home.module';
 import { FollowModule } from './module/follow/follow.module';
-import { CronModule } from './module/cron/cron.module';
+import { CronModule } from './cron/cron.module';
 import { ConfigModule } from './config/config.module';
 
 @Module({
