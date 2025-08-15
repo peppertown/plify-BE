@@ -11,6 +11,7 @@ import {
   fetchPlaylist,
   fetchPlaylistItems,
 } from 'src/utils/spotify';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class PlaylistService {
@@ -18,6 +19,7 @@ export class PlaylistService {
     private readonly prisma: PrismaService,
     private readonly authService: AuthService,
     private readonly redis: RedisService,
+    private readonly configService: ConfigService,
   ) {}
 
   // 전체 플레이리스트 조회
@@ -167,7 +169,7 @@ export class PlaylistService {
     const { playlistUrl, explanation, genres } = addPlaylistDto;
 
     const spotifyRefreshToken = await this.redis.get(
-      `${process.env.REFRESH_KEY_SPOTIFY}:${userId}`,
+      `${this.configService.get<string>('keys.refreshKeySpotify')}:${userId}`,
     );
 
     const spotifyAccessToken =
@@ -175,11 +177,16 @@ export class PlaylistService {
 
     const playlistId = extractPlaylistId(playlistUrl);
 
-    const playlistData = await fetchPlaylist(playlistId, spotifyAccessToken);
+    const playlistData = await fetchPlaylist(
+      playlistId,
+      spotifyAccessToken,
+      this.configService.get<string>('spotify.playlistUrl'),
+    );
 
     const playlistItems = await fetchPlaylistItems(
       playlistId,
       spotifyAccessToken,
+      this.configService.get<string>('spotify.playlistUrl'),
     );
 
     const newPlaylist = await this.prisma.$transaction(async (tx) => {
@@ -354,19 +361,24 @@ export class PlaylistService {
   // 플레이리스트 리페칭
   async refetchPlaylist(userId: number, playlistId: string) {
     const spotifyRefreshToken = await this.redis.get(
-      `${process.env.REFRESH_KEY_SPOTIFY}:${userId}`,
+      `${this.configService.get<string>('keys.refreshKeySpotify')}:${userId}`,
     );
 
     const spotifyAccessToken =
       await this.authService.refreshSpotifyAccessToken(spotifyRefreshToken);
 
-    const playlistData = await fetchPlaylist(playlistId, spotifyAccessToken);
+    const playlistData = await fetchPlaylist(
+      playlistId,
+      spotifyAccessToken,
+      this.configService.get<string>('spotify.playlistUrl'),
+    );
 
     const { userName, name, imageUrl } = playlistData;
 
     const playlistItems = await fetchPlaylistItems(
       playlistId,
       spotifyAccessToken,
+      this.configService.get<string>('spotify.playlistUrl'),
     );
 
     await this.prisma.$transaction(async (tx) => {

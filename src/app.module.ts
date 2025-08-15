@@ -11,9 +11,11 @@ import { MypageModule } from './module/mypage/mypage.module';
 import { HomeModule } from './module/home/home.module';
 import { FollowModule } from './module/follow/follow.module';
 import { CronModule } from './module/cron/cron.module';
+import { ConfigModule } from './config/config.module';
 
 @Module({
   imports: [
+    ConfigModule,
     AuthModule,
     PrismaModule,
     RedisModule,

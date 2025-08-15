@@ -2,14 +2,15 @@ import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, StrategyOptions } from 'passport-spotify';
 import { SpotifyAuthDto } from '../dto/spotify.auth.dto';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class SpotifyStrategy extends PassportStrategy(Strategy, 'spotify') {
-  constructor() {
+  constructor(private configService: ConfigService) {
     super({
-      clientID: process.env.SPOTIFY_CLIENT_ID,
-      clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
-      callbackURL: process.env.SPOTIFY_REDIRECT_URI,
+      clientID: configService.get<string>('spotify.clientId'),
+      clientSecret: configService.get<string>('spotify.clientSecret'),
+      callbackURL: configService.get<string>('spotify.redirectUri'),
       // 기존 스코프에 'user-top-read' 추가
       scope: [
         'user-read-email',

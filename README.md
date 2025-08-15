@@ -75,3 +75,12 @@ Spotify에서 만든 나만의 플레이리스트, 혼자 듣기 아깝지 않�
   <img src="https://github.com/user-attachments/assets/2fb76042-7222-42e2-a04c-16f735d0453d" width="30%">
   <img src="https://github.com/user-attachments/assets/a87c82eb-2984-4182-8534-2039bc4b607d" width="30%">
 </p>
+
+## API 명세
+
+https://api.yeol.store/api-docs
+
+## 설계 포인트
+
+- 유저 취향 데이터를 기반으로 장르별 통계, Top 트랙 / 아티스트를 시각화
+- 스포티파이 API 제한 및 정책에 따른 설계

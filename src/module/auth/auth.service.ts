@@ -4,6 +4,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { SpotifyAuthDto } from './dto/spotify.auth.dto';
 import { JwtService } from '@nestjs/jwt';
 import { RedisService } from 'src/redis/redis.service';
+import { ConfigService } from '@nestjs/config';
 import * as jwt from 'jsonwebtoken';
 
 @Injectable()
@@ -12,10 +13,14 @@ export class AuthService {
     private readonly prisma: PrismaService,
     private readonly jwt: JwtService,
     private readonly redis: RedisService,
+    private readonly configService: ConfigService,
   ) {}
 
   private verifyRefreshToken(token: string): any {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!);
+    const decoded = jwt.verify(
+      token,
+      this.configService.get<string>('jwt.secret')!,
+    );
     if (!decoded) {
       throw new HttpException(
         '유효하지 않은 리프레시 토큰입니다.',
@@ -47,14 +52,14 @@ export class AuthService {
     // 1. 스포티파이 토큰 요청
     const params = new URLSearchParams({
       code,
-      client_id: process.env.SPOTIFY_CLIENT_ID!,
-      client_secret: process.env.SPOTIFY_CLIENT_SECRET!,
-      redirect_uri: process.env.SPOTIFY_REDIRECT_URI!,
+      client_id: this.configService.get<string>('spotify.clientId')!,
+      client_secret: this.configService.get<string>('spotify.clientSecret')!,
+      redirect_uri: this.configService.get<string>('spotify.redirectUri')!,
       grant_type: 'authorization_code',
     });
 
     const tokenResponse = await axios.post(
-      process.env.SPOTIFY_TOKEN_URL,
+      this.configService.get<string>('spotify.tokenUrl'),
       params,
       {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -65,7 +70,7 @@ export class AuthService {
 
     // 2. 스포티파이 유저 정보 조회
     const userInfoResponse = await axios.get(
-      process.env.SPOTIFY_USER_INFO_URL,
+      this.configService.get<string>('spotify.userInfoUrl'),
       {
         headers: { Authorization: `Bearer ${access_token}` },
       },
@@ -172,7 +177,7 @@ export class AuthService {
 
     // 2. Redis에서 Spotify refreshToken 가져오기
     const spotifyRefreshToken = await this.redis.get(
-      `${process.env.REFRESH_KEY_SPOTIFY}:${userId}`,
+      `${this.configService.get<string>('keys.refreshKeySpotify')}:${userId}`,
     );
     if (!spotifyRefreshToken) {
       throw new HttpException(
@@ -194,7 +199,7 @@ export class AuthService {
 
     // 6. 새로운 엑세스 토큰으로 유저 데이터 조회
     const userInfoResponse = await axios.get(
-      process.env.SPOTIFY_USER_INFO_URL,
+      this.configService.get<string>('spotify.userInfoUrl'),
       {
         headers: { Authorization: `Bearer ${spotifyAccessToken}` },
       },
@@ -253,7 +258,7 @@ export class AuthService {
   }
 
   async login(id: string) {
-    if (id == process.env.TEST_ID) {
+    if (id == this.configService.get<string>('keys.testId')) {
       return {
         accessToken: await this.generateAccessToken(2),
       };
@@ -264,7 +269,7 @@ export class AuthService {
 
   async refreshSpotifyAccessToken(refreshToken: string): Promise<string> {
     const basicToken = Buffer.from(
-      `${process.env.SPOTIFY_CLIENT_ID}:${process.env.SPOTIFY_CLIENT_SECRET}`,
+      `${this.configService.get<string>('spotify.clientId')}:${this.configService.get<string>('spotify.clientSecret')}`,
     ).toString('base64');
 
     const params = new URLSearchParams({
@@ -272,12 +277,16 @@ export class AuthService {
       refresh_token: refreshToken,
     });
 
-    const response = await axios.post(process.env.SPOTIFY_TOKEN_URL, params, {
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        Authorization: `Basic ${basicToken}`,
+    const response = await axios.post(
+      this.configService.get<string>('spotify.tokenUrl'),
+      params,
+      {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          Authorization: `Basic ${basicToken}`,
+        },
       },
-    });
+    );
 
     const { access_token } = response.data;
     if (!access_token) {
@@ -299,13 +308,13 @@ export class AuthService {
   }
 
   async saveServerRefreshToken(userId: number, refreshToken: string) {
-    const key = `${process.env.REFRESH_KEY_JWT}:${userId}`;
+    const key = `${this.configService.get<string>('keys.refreshKeyJwt')}:${userId}`;
     const ttlSeconds = 7 * 24 * 60 * 60;
     await this.redis.set(key, refreshToken, ttlSeconds);
   }
 
   async saveSpotifyRefreshToken(userId: number, spotifyRefreshToken: string) {
-    const key = `${process.env.REFRESH_KEY_SPOTIFY}:${userId}`;
+    const key = `${this.configService.get<string>('keys.refreshKeySpotify')}:${userId}`;
     const ttlSeconds = 30 * 24 * 60 * 60;
     await this.redis.set(key, spotifyRefreshToken, ttlSeconds);
   }

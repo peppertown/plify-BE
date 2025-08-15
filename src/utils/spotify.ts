@@ -18,9 +18,10 @@ export function extractPlaylistId(url: string): string {
 export async function fetchPlaylist(
   playlistId: string,
   userAccessToken: string,
+  spotifyPlaylistUrl: string,
 ) {
   try {
-    const url = `${process.env.SPOTIFY_PLAYLIST_URL}/${playlistId}`;
+    const url = `${spotifyPlaylistUrl}/${playlistId}`;
     const response = await axios.get(url, {
       headers: {
         Authorization: `Bearer ${userAccessToken}`,
@@ -48,9 +49,10 @@ export async function fetchPlaylist(
 export async function fetchPlaylistItems(
   playlistId: string,
   userAccessToken: string,
+  spotifyPlaylistUrl: string,
 ) {
   try {
-    const url = `${process.env.SPOTIFY_PLAYLIST_URL}/${playlistId}/tracks`;
+    const url = `${spotifyPlaylistUrl}/${playlistId}/tracks`;
     const response = await axios.get(url, {
       headers: {
         Authorization: `Bearer ${userAccessToken}`,

@@ -1,10 +1,14 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import axios from 'axios';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class RankService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly configService: ConfigService,
+  ) {}
 
   async handleUserTopTracks(
     spotifyAccessToken: string,
@@ -243,7 +247,7 @@ export class RankService {
   // 유저 탑 트랙 조회 (스포티파이)
   // 예외처리 /
   async fetchSpotifyTopTracks(userAccessToken: string, term: string) {
-    const url = `${process.env.SPOTIFY_TOP_TRACK_URL}${term}`;
+    const url = `${this.configService.get<string>('spotify.topTrackUrl')}${term}`;
 
     const response = await axios.get(url, {
       headers: {
@@ -267,7 +271,7 @@ export class RankService {
 
   // 예외처리 /
   async fetchSpotifyTopArtists(userAccessToken: string, term: string) {
-    const url = `${process.env.SPOTIFY_TOP_ARTIST_URL}${term}`;
+    const url = `${this.configService.get<string>('spotify.topArtistUrl')}${term}`;
 
     const response = await axios.get(url, {
       headers: {

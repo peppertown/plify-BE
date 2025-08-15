@@ -6,14 +6,18 @@ import {
   HttpStatus,
   Logger,
   Injectable,
+  Inject,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { Prisma } from '@prisma/client';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
   private readonly logger = new Logger(GlobalExceptionFilter.name);
+
+  constructor(private readonly configService: ConfigService) {}
 
   catch(exception: unknown, host: ArgumentsHost): void {
     const ctx = host.switchToHttp();
@@ -52,7 +56,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     // 알 수 없는 에러
     else if (exception instanceof Error) {
       // 개발환경에서는 상세한 에러 메시지, 프로덕션에서는 일반적인 메시지
-      const isDevelopment = process.env.NODE_ENV === 'development';
+      const isDevelopment = this.configService.get<string>('nodeEnv') === 'development';
       message = isDevelopment
         ? `[${errorId}] ${exception.message}`
         : `서버 오류가 발생했습니다. (Error ID: ${errorId})`;
